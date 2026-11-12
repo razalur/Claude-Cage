@@ -57,6 +57,9 @@ mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
 swiftc -O -target "$(uname -m)-apple-macosx14.0" -parse-as-library -framework Cocoa -framework WebKit -framework Security -framework LocalAuthentication desktop/Cage.swift desktop/MacKeyboard.swift desktop/NativeInput.swift desktop/Updates.swift desktop/AccountDevice.swift desktop/MacGuestLogin.swift -o "$bundle/Contents/MacOS/Cage"
 swiftc -O -target "$(uname -m)-apple-macosx14.0" -parse-as-library -framework Cocoa -framework Security desktop/Updates.swift desktop/UpdateInstaller.swift -o "$bundle/Contents/Resources/CageUpdateInstaller"
 cp _output/bin/cage "$bundle/Contents/Resources/cage"
+if [[ "${VITE_CAGE_UI_LANGUAGE:-}" == en ]]; then
+  cp ui/src/locales/en.json "$bundle/Contents/Resources/Cage-English.json"
+fi
 if [[ "$(uname -m)" == arm64 ]]; then "$bundle/Contents/Resources/cage" verify-macos-guest; fi
 if [[ "$(uname -m)" == arm64 ]]; then
   bash scripts/guest-os/package-macos-guest.sh "$bundle/Contents/Resources/guest-os"

@@ -1,3 +1,4 @@
+import { uiFormat } from "./ui-language.mjs";
 import React, { Children, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSelectPopup } from "./select-popup";
@@ -160,7 +161,7 @@ export function InlineSelect({
           ref={list}
           id={id}
           role="listbox"
-          aria-label={(props["aria-label"] || "") + "选项"}
+          aria-label={uiFormat("{0}选项", props["aria-label"] || "")}
           className="inline-select-list"
           style={position}
           onMouseDown={(event) => event.preventDefault()}

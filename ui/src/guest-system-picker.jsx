@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, { useEffect, useRef, useState } from "react";
 import { api, native } from "./api";
 import { InlineSelect } from "./inline-select";
@@ -109,7 +110,7 @@ export function GuestSystemPicker({ system, onChange, preserveOnUnmount = false,
         </> : os === "macos" ? <>
           <small>{system.media || "将从 Apple 下载 macOS 26.5.2（19.77 GB），并创建 64 GiB 稀疏虚拟磁盘。"}</small>
           {!system.pending && <div>
-            <button type="button" onClick={choose}>选择本机 IPSW</button>
+            <button type="button" onClick={choose}>{uiText("选择本机 IPSW")}</button>
             {system.media && <button type="button" onClick={() => change({ media: "" })}>改为下载</button>}
           </div>}
           <small>客机账户和独立密码由 Cage 自动准备并加密保管，启动时自动登录。</small>
@@ -117,7 +118,7 @@ export function GuestSystemPicker({ system, onChange, preserveOnUnmount = false,
           <small>Windows 11 x64 需要 Hyper-V 和至少 64 GiB 可用磁盘空间。安装前在授权窗口设置客机本地管理员，Cage 会生成离线账户应答。进入客机桌面后回 Cage 继续，使用该账户确认组件安装。Cage 随后创建专用普通账户并重启客机。</small>
           {!system.pending && <div>
             <button type="button" onClick={() => reference("windows-media")}>从微软下载 ISO</button>
-            <button type="button" onClick={choose}>选择本机 ISO</button>
+            <button type="button" onClick={choose}>{uiText("选择本机 ISO")}</button>
           </div>}
           {system.media && <small>{system.media}</small>}
           <label>ISO 的 SHA-256<input value={system.sha256} readOnly={system.pending} spellCheck={false}

@@ -1,3 +1,4 @@
+import { uiLanguage, uiText } from "./ui-language.mjs";
 import React, { useState } from "react";
 import {
   ShieldCheck,
@@ -12,7 +13,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { api, writeClipboard } from "./api";
-import { Modal } from "./views";
+import { Modal } from "./modal";
+import { safetyText } from "./safety-language.mjs";
 import { networkState, reportForSharing } from "./safety-state.mjs";
 
 const diagnostics = [
@@ -20,19 +22,19 @@ const diagnostics = [
     name: "IP 质量",
     source: "ip.net.coffee",
     url: "https://ip.net.coffee/claude/",
-    description: "查看 IP 属性、ASN、信誉评分与网络诊断。",
+    description: uiText("查看 IP 属性、ASN、信誉评分与网络诊断。"),
   },
   {
     name: "浏览器信息",
     source: "fuck-claude.vercel.app",
     url: "https://fuck-claude.vercel.app/",
     description: "查看时区、语言、字体等浏览器信号的社区评估。",
-    attribution: "原项目 FuckClaude 由 LinXiaoTao 创建并持续维护。",
+    attribution: uiText("原项目 FuckClaude 由 LinXiaoTao 创建并持续维护。"),
     links: [
-      { label: "原项目官网", url: "https://fuck-claude.vercel.app/" },
-      { label: "开源仓库", url: "https://github.com/LinXiaoTao/FuckClaude" },
+      { label: uiText("原项目官网"), url: "https://fuck-claude.vercel.app/" },
+      { label: uiText("开源仓库"), url: "https://github.com/LinXiaoTao/FuckClaude" },
       {
-        label: "初始提交",
+        label: uiText("初始提交"),
         url: "https://github.com/LinXiaoTao/FuckClaude/commit/420c79bb0531b12ea2788e726ffbf81075111737",
       },
     ],
@@ -40,7 +42,7 @@ const diagnostics = [
 ];
 
 export async function bindDetectedMacOSExit(ip, onConfirm) {
-  if (!(await onConfirm({ title: "绑定固定出口？", body: `客机终端、浏览器和代理均测得 ${ip}。保存后请重启客机并重新检测。`, confirm: "绑定固定出口" }))) return null;
+  if (!(await onConfirm({ title: uiText("绑定固定出口？"), body: uiText("客机终端、浏览器和代理均测得 {ip}。保存后请重启客机并重新检测。").replace("{ip}", () => ip), confirm: uiText("绑定固定出口") }))) return null;
   return api("/macos/exit-policy", { ip });
 }
 
@@ -68,9 +70,9 @@ export function SafetyPanel({
       status.vm_running &&
       !safety.gate &&
       !(await onConfirm({
-        title: "重启环境并加载检测组件？",
-        body: "当前终端会话将结束。请先保存文件，浏览器登录与项目文件会保留。",
-        confirm: "重启并检查",
+        title: uiText("重启环境并加载检测组件？"),
+        body: uiText("当前终端会话将结束。请先保存文件，浏览器登录与项目文件会保留。"),
+        confirm: uiText("重启并检查"),
       }))
     )
       return;
@@ -101,17 +103,17 @@ export function SafetyPanel({
   };
   return (
     <Modal
-      title="网络与隔离检查"
+      title={uiText("网络与隔离检查")}
       wide
       onClose={onClose}
       footer={
         <>
           <span className="save-note">
-            {busy ? status.job.message : "外网关闭时，离线终端和文件仍可使用"}
+            {busy ? safetyText(status.job.message) : uiText("外网关闭时，离线终端和文件仍可使用")}
           </span>
           {(online || network.mode === "checking") && (
             <button onClick={pause}>
-              {network.mode === "checking" ? "取消检测并关闭外网" : "暂停外网"}
+              {network.mode === "checking" ? uiText("取消检测并关闭外网") : uiText("暂停外网")}
             </button>
           )}
           <button className="primary" disabled={busy} onClick={run}>
@@ -121,23 +123,23 @@ export function SafetyPanel({
               <ShieldCheck size={15} />
             )}
             {busy
-              ? "检查进行中"
+              ? uiText("检查进行中")
               : online
-                ? "暂停外网并重检"
+                ? uiText("暂停外网并重检")
                 : status.ready && safety.gate
-                  ? "重新检测"
+                  ? uiText("重新检测")
                   : status.vm_running
-                    ? "重启并检查"
-                    : "启动并检查"}
+                    ? uiText("重启并检查")
+                    : uiText("启动并检查")}
           </button>
         </>
       }
     >
       <div className="modal-body safety-body">
         {safety.macos_exit_candidate?.ip && <button disabled={busy} onClick={async () => {
-          try { if (await bindDetectedMacOSExit(safety.macos_exit_candidate.ip, onConfirm)) setNotice("固定出口已提交，请在保存完成后重启客机并重新检测。"); }
+          try { if (await bindDetectedMacOSExit(safety.macos_exit_candidate.ip, onConfirm)) setNotice(uiText("固定出口已提交，请在保存完成后重启客机并重新检测。")); }
           catch (e) { setError(e.message); }
-        }}>绑定检测到的固定出口 {safety.macos_exit_candidate.ip}</button>}
+        }}>{uiText("绑定检测到的固定出口")} {safety.macos_exit_candidate.ip}</button>}
         <div className={`safety-summary ${network.mode}`}>
           {online ? (
             <ShieldCheck size={27} />
@@ -150,17 +152,17 @@ export function SafetyPanel({
             <h3>{network.label}</h3>
             <p>
               {busy
-                ? status.job.message
+                ? safetyText(status.job.message)
                 : online
-                  ? status.network_error || "关键检查已通过，后台继续核对出口规则与环境配置。"
-                  : status.network_error || safety.error ||
+                  ? safetyText(status.network_error || "关键检查已通过，后台继续核对出口规则与环境配置。")
+                  : safetyText(status.network_error || safety.error ||
                     safety.gate?.reason ||
-                    "完成关键检查后，才允许连接外部网站。"}
+                    "完成关键检查后，才允许连接外部网站。")}
             </p>
           </div>
           <button className="text-button" onClick={() => onSettings("network")}>
             <Settings size={15} />
-            出口规则
+            {uiText("出口规则")}
           </button>
         </div>
         {(error || notice) && (
@@ -168,24 +170,24 @@ export function SafetyPanel({
             role="status"
             className={error ? "error-message" : "inline-info"}
           >
-            {error || notice}
+            {safetyText(error || notice)}
           </div>
         )}
         <div className="safety-section-heading">
-          <h4>关键检查</h4>
-          <span>{total ? `${passed} / ${total} 通过` : "尚无检测记录"}</span>
+          <h4>{uiText("关键检查")}</h4>
+          <span>{total ? `${passed} / ${total} ${uiText("通过")}` : uiText("尚无检测记录")}</span>
           {report && (
             <button className="text-button" onClick={copy}>
               <Copy size={14} />
-              复制报告
+              {uiText("复制报告")}
             </button>
           )}
         </div>
         {report ? (
           <>
             <p className="safety-timestamp">
-              检测于 {new Date(report.created_at).toLocaleString("zh-CN")} ·{" "}
-              {online ? "当前运行实例" : "报告不代表当前已放行"}
+              {uiText("检测于")} {new Date(report.created_at).toLocaleString(uiLanguage)} ·{" "}
+              {online ? uiText("当前运行实例") : uiText("报告不代表当前已放行")}
             </p>
             <div className="safety-checks">
               {report.checks
@@ -204,22 +206,22 @@ export function SafetyPanel({
                     >
                       <summary>
                         <Icon size={16} />
-                        <strong>{check.title}</strong>
+                        <strong>{uiText(check.title)}</strong>
                         <span>
                           {check.state === "passed"
-                            ? "通过"
+                            ? uiText("通过")
                             : check.state === "failed"
-                              ? "未通过"
+                              ? uiText("未通过")
                               : busy && check.checked_at === report.created_at
-                                ? "待检查"
-                                : "未知"}
+                                ? uiText("待检查")
+                                : uiText("未知")}
                         </span>
                         <ChevronDown size={14} />
                       </summary>
                       <div>
-                        <p>{check.evidence}</p>
+                        <p>{safetyText(check.evidence)}</p>
                         {check.state !== "passed" && check.remedy && (
-                          <p className="check-remedy">{check.remedy}</p>
+                          <p className="check-remedy">{safetyText(check.remedy)}</p>
                         )}
                       </div>
                     </details>
@@ -229,7 +231,7 @@ export function SafetyPanel({
           </>
         ) : (
           <p className="safety-empty">
-            检查涵盖出站规则、代理故障关闭、DNS、共享目录、宿主管理接口，以及系统和浏览器的实际配置。关键项失败或未知时保持外网关闭。
+            {uiText("检查涵盖出站规则、代理故障关闭、DNS、共享目录、宿主管理接口，以及系统和浏览器的实际配置。关键项失败或未知时保持外网关闭。")}
           </p>
         )}
         {report?.checks?.some((check) => !check.critical) && (
@@ -240,25 +242,25 @@ export function SafetyPanel({
                 <p key={check.id}>
                   <CircleHelp size={15} />
                   <span>
-                    <strong>{check.title}：</strong>
-                    {check.evidence}
+                    <strong>{uiText(check.title)}{uiLanguage === "en" ? ": " : "："}</strong>
+                    {safetyText(check.evidence)}
                   </span>
                 </p>
               ))}
           </div>
         )}
         <div className="safety-section-heading">
-          <h4>社区补充检查</h4>
-          <span>提示项，不参与联网准入</span>
+          <h4>{uiText("社区补充检查")}</h4>
+          <span>{uiText("提示项，不参与联网准入")}</span>
         </div>
         <div className="diagnostic-sites">
           {diagnostics.map((site) => (
             <div key={site.url}>
-              <strong>{site.name}</strong>
+              <strong>{uiText(site.name)}</strong>
               <small>{site.source}</small>
-              <p>{site.description}</p>
+              <p>{uiText(site.description)}</p>
               <button disabled={!online || busy} onClick={() => open(site.url)}>
-                在 Cage 中打开
+                {uiText("在 Cage 中打开")}
                 <ArrowUpRight size={14} />
               </button>
               {site.attribution && (
@@ -283,22 +285,18 @@ export function SafetyPanel({
           ))}
         </div>
         <p className="field-help">
-          点击后才访问第三方站点。站点会收到 Cage 的出口
-          IP，并可读取该页面可访问的浏览器信息。评分属于社区参考。
+          {uiText("点击后才访问第三方站点。站点会收到 Cage 的出口 IP，并可读取该页面可访问的浏览器信息。评分属于社区参考。")}
         </p>
         <details className="safety-scope">
-          <summary>检查范围与来源</summary>
+          <summary>{uiText("检查范围与来源")}</summary>
           <p>
-            当前版本验证 IPv4 出口，客机公网 IPv6 与 UDP 关闭。出口监测约每 30
-            秒执行；位置来自 IP
-            数据库，城市判断具有误差。代理自身按目标分流的行为仍需在代理侧约束。
+            {uiText("当前版本验证 IPv4 出口，客机公网 IPv6 与 UDP 关闭。出口监测约每 30 秒执行；位置来自 IP 数据库，城市判断具有误差。代理自身按目标分流的行为仍需在代理侧约束。")}
           </p>
           <p>
-            报告包含运行时策略和采样证据，不能代替完整虚拟化审计，也不代表平台账号资格或封禁预测。全面检查有效期为
-            24 小时；控制服务失联后，联网授权最多保留 90 秒。
+            {uiText("报告包含运行时策略和采样证据，不能代替完整虚拟化审计，也不代表平台账号资格或封禁预测。全面检查有效期为 24 小时；控制服务失联后，联网授权最多保留 90 秒。")}
           </p>
           <div className="safety-sources">
-            <span>方法参考</span>
+            <span>{uiText("方法参考")}</span>
             <button
               className="text-button"
               disabled={!online}

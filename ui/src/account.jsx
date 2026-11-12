@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import React, {
   createContext,
   useContext,
@@ -158,15 +159,15 @@ export function MacOSAccountGate({ children }) {
     finally { setBusy(false); }
   }
   return <main className="account-gate"><div className="account-brand"><img src={logo} alt="" />Cage</div><section className="account-entry">
-    <h1>设置 Cage 与 macOS 共用账密</h1>
-    <p className="account-entry-intro">{account.trusted_local ? "先设置 Cage 用户名和密码，再继续客机安装。已有账户、文件和登录状态会保留。" : "输入当前 Cage 密码，确认用于 macOS 客机。已有客机保留用户名和用户目录。"}</p>
+    <h1>{uiText("设置 Cage 与 macOS 共用账密")}</h1>
+    <p className="account-entry-intro">{account.trusted_local ? uiText("先设置 Cage 用户名和密码，再继续客机安装。已有账户、文件和登录状态会保留。") : uiText("输入当前 Cage 密码，确认用于 macOS 客机。已有客机保留用户名和用户目录。")}</p>
     <form onSubmit={submit}><fieldset disabled={busy}>
-      <label className="account-field">用户名<input required value={name} onChange={event => setName(event.target.value)} maxLength={31} pattern="[a-z][a-z0-9_]{0,30}" readOnly={Boolean(account.macos_guest_user)} autoComplete="username" /></label>
-      <p className="field-help">小写字母开头，1–31 个小写字母、数字或下划线。密码使用 8–256 个英文键盘可输入的字符。</p>
-      <PasswordField label={account.trusted_local ? "设置密码" : "当前 Cage 密码"} value={password} onChange={setPassword} autoComplete={account.trusted_local ? "new-password" : "current-password"} />
-      <PasswordField label="确认密码" value={confirmation} onChange={setConfirmation} autoComplete={account.trusted_local ? "new-password" : "current-password"} />
-      {error && <p role="alert" className="account-error">{error}</p>}
-      <button className="primary account-submit" disabled={busy}>{busy ? "正在保存…" : "保存账密并继续"}</button>
+      <label className="account-field">{uiText("用户名")}<input required value={name} onChange={event => setName(event.target.value)} maxLength={31} pattern="[a-z][a-z0-9_]{0,30}" readOnly={Boolean(account.macos_guest_user)} autoComplete="username" /></label>
+      <p className="field-help">{uiText("小写字母开头，1–31 个小写字母、数字或下划线。密码使用 8–256 个英文键盘可输入的字符。")}</p>
+      <PasswordField label={account.trusted_local ? uiText("设置密码") : uiText("当前 Cage 密码")} value={password} onChange={setPassword} autoComplete={account.trusted_local ? "new-password" : "current-password"} />
+      <PasswordField label={uiText("确认密码")} value={confirmation} onChange={setConfirmation} autoComplete={account.trusted_local ? "new-password" : "current-password"} />
+      {error && <p role="alert" className="account-error">{uiText(error)}</p>}
+      <button className="primary account-submit" disabled={busy}>{busy ? uiText("正在保存…") : uiText("保存账密并继续")}</button>
     </fieldset></form>
   </section></main>;
 }
@@ -181,7 +182,7 @@ function PasswordField({
   const id = useId();
   return (
     <div className="account-field">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>{uiText(label)}</label>
       <span className="password-input">
         <input
           id={id}
@@ -195,7 +196,7 @@ function PasswordField({
         <button
           type="button"
           className="icon-button"
-          aria-label={`${visible ? "隐藏" : "显示"}${label}`}
+          aria-label={uiText(visible ? "隐藏{label}" : "显示{label}").replace("{label}", () => uiText(label))}
           onClick={() => setVisible(!visible)}
         >
           {visible ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -290,7 +291,7 @@ export function AccountGate({ children }) {
       </div>
       <section
         className="account-entry"
-        aria-label={creating ? isRemoteClient() ? "创建云端账户" : "创建本地账户" : "解锁 Cage"}
+        aria-label={creating ? isRemoteClient() ? uiText("创建云端账户") : uiText("创建本地账户") : uiText("解锁 Cage")}
       >
         {creating ? (
           <img className="account-welcome-logo" src={logo} alt="" />
@@ -299,35 +300,35 @@ export function AccountGate({ children }) {
         )}
         <h1>
           {creating
-            ? "注册 Cage 账户"
+            ? uiText("注册 Cage 账户")
             : account
-              ? `欢迎回来，${account.username}`
-              : "正在连接 Cage"}
+              ? uiText("欢迎回来，{name}").replace("{name}", () => account.username)
+              : uiText("正在连接 Cage")}
         </h1>
         <p className="account-entry-intro">
           {creating
-            ? isRemoteClient() ? "在云端创建账户，保护这台主机上的工作与登录状态。" : "先注册用户名和密码，再选择客机系统并安装环境。macOS 客机会使用同一套账密。"
+            ? isRemoteClient() ? uiText("在云端创建账户，保护这台主机上的工作与登录状态。") : uiText("先注册用户名和密码，再选择客机系统并安装环境。macOS 客机会使用同一套账密。")
             : account
-              ? account.trusted_local ? "本机工作区" : "输入密码，继续你的工作。"
-              : isRemoteClient() ? "正在读取云端账户…" : "正在读取本机账户…"}
+              ? account.trusted_local ? uiText("本机工作区") : uiText("输入密码，继续你的工作。")
+              : isRemoteClient() ? uiText("正在读取云端账户…") : uiText("正在读取本机账户…")}
         </p>
         {account?.background_running && (
           <div className="account-background">
             <i />
-            后台环境仍在运行，任务没有停止
+            {uiText("后台环境仍在运行，任务没有停止")}
           </div>
         )}
         {account?.trusted_local && <div className="account-trust-choice">
-          <p>{localDesktop() ? "使用当前系统用户的本机信任凭据进入工作区。" : "请回到受信任的桌面设置账户密码，再从此处登录。"}</p>
-          {localDesktop() && <button className="quiet-button" disabled={busy} onClick={() => enterTrusted("resume")}>{busy ? "正在进入…" : "重新进入本机工作区"}</button>}
+          <p>{localDesktop() ? uiText("使用当前系统用户的本机信任凭据进入工作区。") : uiText("请回到受信任的桌面设置账户密码，再从此处登录。")}</p>
+          {localDesktop() && <button className="quiet-button" disabled={busy} onClick={() => enterTrusted("resume")}>{busy ? uiText("正在进入…") : uiText("重新进入本机工作区")}</button>}
         </div>}
-        {account?.trusted_local && error && <p className="account-error" role="alert">{error}</p>}
+        {account?.trusted_local && error && <p className="account-error" role="alert">{uiText(error)}</p>}
         {account && !account.trusted_local && (
           <form onSubmit={submit}>
             <fieldset disabled={busy}>
               {creating && (
                 <><label className="account-field">
-                  用户名
+                  {uiText("用户名")}
                   <input
                     autoFocus
                     autoComplete="username"
@@ -336,44 +337,44 @@ export function AccountGate({ children }) {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={account.macos_account_host ? "例如：shihao" : "你希望怎样被称呼"}
+                    placeholder={account.macos_account_host ? uiText("例如：shihao") : uiText("你希望怎样被称呼")}
                   />
                 </label>
-                {account.macos_account_host && <p className="field-help">与 macOS 客机共用：小写字母开头，1–31 个小写字母、数字或下划线。</p>}</>
+                {account.macos_account_host && <p className="field-help">{uiText("与 macOS 客机共用：小写字母开头，1–31 个小写字母、数字或下划线。")}</p>}</>
               )}
               <PasswordField
-                label={creating ? "设置密码" : "账户密码"}
+                label={creating ? uiText("设置密码") : uiText("账户密码")}
                 value={password}
                 onChange={setPassword}
                 autoComplete={creating ? "new-password" : "current-password"}
               />
               {creating && (
                 <PasswordField
-                  label="确认密码"
+                  label={uiText("确认密码")}
                   value={confirmation}
                   onChange={setConfirmation}
                   autoComplete="new-password"
                 />
               )}
-              {creating && account.macos_account_host && <p className="field-help">密码使用 8–256 个英文键盘可输入的字母、数字、空格或符号。安装中断后继续使用这套账密。</p>}
+              {creating && account.macos_account_host && <p className="field-help">{uiText("密码使用 8–256 个英文键盘可输入的字母、数字、空格或符号。安装中断后继续使用这套账密。")}</p>}
               {(error || connectionError) && (
                 <p className="account-error" role="alert">
-                  {error || connectionError}
+                  {uiText(error) || connectionError}
                 </p>
               )}
               {!creating && Object.values(deviceSupport?.device_status || {}).includes("missing") && (
-                <p className="field-help" role="status">当前目录的快捷登录凭据缺失或已失效。请用密码解锁，再到「设置 → 账户 → 登录与解锁」重新开启。</p>
+                <p className="field-help" role="status">{uiText("当前目录的快捷登录凭据缺失或已失效。请用密码解锁，再到「设置 → 账户 → 登录与解锁」重新开启。")}</p>
               )}
               {!creating && Object.values(deviceSupport?.device_status || {}).includes("unavailable") && (
-                <p className="field-help" role="status">暂时无法检查系统钥匙串，请先用密码解锁。快捷登录授权记录已保留。</p>
+                <p className="field-help" role="status">{uiText("暂时无法检查系统钥匙串，请先用密码解锁。快捷登录授权记录已保留。")}</p>
               )}
               {deviceSupport?.supported && !deviceSupport.device_status && (
-                <p className="field-help" role="status">当前应用启动器需要更新，暂时无法检查快捷登录状态。请先用密码进入，并重新安装完整的 Cage 应用。</p>
+                <p className="field-help" role="status">{uiText("当前应用启动器需要更新，暂时无法检查快捷登录状态。请先用密码进入，并重新安装完整的 Cage 应用。")}</p>
               )}
               {(localDesktop() || (creating && deviceSupport?.supported && deviceSupport.device_status)) && (
                 <label className="account-device-option check-line">
                   <input type="checkbox" checked={rememberThisDevice} onChange={(e) => setRememberLogin(e.target.checked)} />
-                  <span><strong>{localDesktop() ? "记住我" : "记住登录"}</strong><small>{localDesktop() ? "信任此电脑，下次用当前系统用户打开时直接进入。手动锁定仍需验证。" : "下次打开直接进入。手动锁定后仍需验证。"}</small></span>
+                  <span><strong>{localDesktop() ? uiText("记住我") : uiText("记住登录")}</strong><small>{localDesktop() ? uiText("信任此电脑，下次用当前系统用户打开时直接进入。手动锁定仍需验证。") : uiText("下次打开直接进入。手动锁定后仍需验证。")}</small></span>
                 </label>
               )}
               {!creating && deviceSupport?.supported && credentialPresent(deviceSupport.device_status?.biometric) && account.devices?.biometric && (
@@ -384,14 +385,14 @@ export function AccountGate({ children }) {
                     catch (e) { setError(e.message); }
                     finally { setBusy(false); }
                   }}>
-                  <Fingerprint size={18} />使用 Touch ID 解锁
+                  <Fingerprint size={18} />{uiText("使用 Touch ID 解锁")}
                 </button>
               )}
               <button
                 className="primary account-submit"
                 disabled={busy || !password || (creating && (!username.trim() || (!localDesktop() && nativeAvailable() && deviceSupport === null)))}
               >
-                {busy ? "正在解锁…" : creating ? isRemoteClient() ? "创建云端账户" : "创建本地账户" : "解锁 Cage"}
+                {busy ? uiText("正在解锁…") : creating ? isRemoteClient() ? uiText("创建云端账户") : uiText("创建本地账户") : uiText("解锁 Cage")}
               </button>
             </fieldset>
           </form>
@@ -401,17 +402,17 @@ export function AccountGate({ children }) {
             <p role="alert" className="account-error">
               {connectionError}
             </p>
-            <button onClick={() => refresh().catch(() => {})}>重新连接</button>
+            <button onClick={() => refresh().catch(() => {})}>{uiText("重新连接")}</button>
           </>
         )}
         <p className="account-local-note">
           <LockKeyhole size={14} />
-          {isRemoteClient() ? "账户资料保存在当前云端主机" : "账户资料仅保存在这台设备上"}
+          {isRemoteClient() ? uiText("账户资料保存在当前云端主机") : uiText("账户资料仅保存在这台设备上")}
         </p>
         {!account?.trusted_local && <p className="account-recovery-note">
           {creating
-            ? "密码至少 8 个字符，用于保护应用登录凭据。请妥善保存，当前不支持在线找回。"
-            : isRemoteClient() ? "请输入云端 Cage 账户密码；当前不支持在线找回。" : "请输入本地账户密码；当前不支持在线找回。"}
+            ? uiText("密码至少 8 个字符，用于保护应用登录凭据。请妥善保存，当前不支持在线找回。")
+            : isRemoteClient() ? uiText("请输入云端 Cage 账户密码；当前不支持在线找回。") : uiText("请输入本地账户密码；当前不支持在线找回。")}
         </p>}
       </section>
       {nativeAvailable() && (
@@ -419,7 +420,7 @@ export function AccountGate({ children }) {
           className="text-button account-exit-app"
           onClick={() => native("quitNow").catch((e) => setError(e.message))}
         >
-          {account?.background_running ? "退出应用，后台继续运行" : "退出 Cage"}
+          {account?.background_running ? uiText("退出应用，后台继续运行") : uiText("退出 Cage")}
         </button>
       )}
     </main>
@@ -457,9 +458,9 @@ export function AccountMenu({ onSettings, onConfirm, onStatus, busy }) {
     if (
       action === "logout" &&
       !(await onConfirm({
-        title: isRemoteClient() ? "退出云端账户？" : "退出本地账户？",
-        body: "这会停止 Cage 环境与后台任务，并锁定登录凭据。请先保存文件。",
-        confirm: "停止环境并退出账户",
+        title: isRemoteClient() ? uiText("退出云端账户？") : uiText("退出本地账户？"),
+        body: uiText("这会停止 Cage 环境与后台任务，并锁定登录凭据。请先保存文件。"),
+        confirm: uiText("停止环境并退出账户"),
       }))
     )
       return;
@@ -473,7 +474,7 @@ export function AccountMenu({ onSettings, onConfirm, onStatus, busy }) {
     <div className="account-menu-root" ref={root}>
       <button
         className="account-trigger"
-        aria-label={`账户菜单，${account.username}`}
+        aria-label={uiFormat("账户菜单，{0}", account.username)}
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen(!open)}
@@ -481,12 +482,12 @@ export function AccountMenu({ onSettings, onConfirm, onStatus, busy }) {
         <AccountAvatar account={account} />
         <span className="account-trigger-name">
           <strong>{account.username}</strong>
-          <small>{account.trusted_local ? "受信任的本机" : isRemoteClient() ? "云端账户" : "本地账户"}</small>
+          <small>{account.trusted_local ? uiText("受信任的本机") : isRemoteClient() ? uiText("云端账户") : uiText("本地账户")}</small>
         </span>
         <ChevronDown size={15} />
       </button>
       {open && (
-        <div className="account-menu" role="menu" aria-label={isRemoteClient() ? "云端账户菜单" : "本地账户菜单"}
+        <div className="account-menu" role="menu" aria-label={isRemoteClient() ? uiText("云端账户菜单") : uiText("本地账户菜单")}
           onKeyDown={(event) => {
             if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
             event.preventDefault();
@@ -495,7 +496,7 @@ export function AccountMenu({ onSettings, onConfirm, onStatus, busy }) {
             items[(items.indexOf(event.target) + step + items.length) % items.length].focus();
           }}
         >
-          <div className="account-menu-label">你的 Cage</div>
+          <div className="account-menu-label">{uiText("你的 Cage")}</div>
           <button
             role="menuitem"
             onClick={() => {
@@ -504,24 +505,20 @@ export function AccountMenu({ onSettings, onConfirm, onStatus, busy }) {
             }}
           >
             <Settings size={16} />
-            设置
+            {uiText("设置")}
           </button>
           {account.trusted_local ? <button role="menuitem" onClick={() => { setOpen(false); onSettings("account"); }}>
-            <LockKeyhole size={16} /> 设置账户密码
-          </button> : <>
+            <LockKeyhole size={16} /> {uiText("设置账户密码")}</button> : <>
           <div className="account-menu-divider" />
           <button role="menuitem" onClick={() => perform("lock")}>
-            <LockKeyhole size={16} />
-            锁定 Cage<small>任务继续运行</small>
+            <LockKeyhole size={16} />{uiText("锁定 Cage")}<small>{uiText("任务继续运行")}</small>
           </button>
           <button
             role="menuitem"
             disabled={busy}
             onClick={() => perform("logout")}
           >
-            <LogOut size={16} />
-            退出账户
-          </button></>}
+            <LogOut size={16} />{uiText("退出账户")}</button></>}
         </div>
       )}
     </div>
@@ -615,13 +612,13 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
     <>
       {error && (
         <p className="account-error" role="alert">
-          {error}
+          {uiText(error)}
         </p>
       )}
       {message && (
         <p className="account-saved" role="status">
           <Check size={15} />
-          {message}
+          {uiText(message)}
         </p>
       )}
     </>
@@ -630,8 +627,8 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
   return (
     <div className="account-settings">
       <div className="section-title">
-        <h3>账户</h3>
-        <p>给工作空间一点你的样子。</p>
+        <h3>{uiText("账户")}</h3>
+        <p>{uiText("给工作空间一点你的样子。")}</p>
       </div>
       <form onSubmit={(event) => save(event)}>
         <fieldset disabled={busy || environmentBusy}>
@@ -643,21 +640,15 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
                 className="quiet-button"
                 onClick={() => file.current.click()}
               >
-                <Camera size={16} />
-                更换头像
-              </button>
+                <Camera size={16} />{uiText("更换头像")}</button>
               {avatar && (
                 <button
                   type="button"
                   className="text-button"
                   onClick={() => setAvatar("")}
-                >
-                  恢复默认
-                </button>
+                >{uiText("恢复默认")}</button>
               )}
-              <p className="field-help">
-                PNG 或 JPEG，最多 2 MB，自动居中裁切。
-              </p>
+              <p className="field-help">{uiText("PNG 或 JPEG，最多 2 MB，自动居中裁切。")}</p>
             </div>
           </div>
           <input
@@ -666,10 +657,10 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
             accept="image/png,image/jpeg"
             hidden
             onChange={upload}
-            aria-label="选择头像图片"
+            aria-label={uiText("选择头像图片")}
           />
           <label className="account-field">
-            用户名
+            {uiText("用户名")}
             <input
               value={name}
               maxLength={40}
@@ -679,37 +670,34 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
               readOnly={account.macos_username_bound}
             />
           </label>
-          {account.macos_username_bound && <p className="field-help">用户名已用于 macOS 客机，保留该名称以继续使用原账户和文件。</p>}
+          {account.macos_username_bound && <p className="field-help">{uiText("用户名已用于 macOS 客机，保留该名称以继续使用原账户和文件。")}</p>}
           <button
             className="primary"
             disabled={!changed || !name.trim() || busy}
           >
-            <Check size={16} />
-            保存资料
-          </button>
+            <Check size={16} />{uiText("保存资料")}</button>
         </fieldset>
       </form>
       {feedbackTarget === "profile" && feedback}
       <div className="account-section-divider" />
       <form onSubmit={(event) => save(event, true)}>
         <fieldset disabled={busy || environmentBusy}>
-          <h4>账户密码</h4>
-          <p className="field-help">
-            修改密码不会清除 Claude 的登录状态。{account.macos_credentials_ready ? "Cage 与 macOS 客机共用密码；客机关闭时会在下次启动后同步。" : isRemoteClient() ? "密码用于解锁当前云端 Cage，没有在线找回。" : "密码用于本机解锁，没有在线找回。"}
+          <h4>{uiText("账户密码")}</h4>
+          <p className="field-help">{uiText("修改密码不会清除 Claude 的登录状态。")}{account.macos_credentials_ready ? uiText("Cage 与 macOS 客机共用密码；客机关闭时会在下次启动后同步。") : isRemoteClient() ? uiText("密码用于解锁当前云端 Cage，没有在线找回。") : uiText("密码用于本机解锁，没有在线找回。")}
           </p>
           {!account.trusted_local && <PasswordField
-            label="当前密码"
+            label={uiText("当前密码")}
             value={oldPassword}
             onChange={setOldPassword}
           />}
           <PasswordField
-            label="新密码"
+            label={uiText("新密码")}
             value={password}
             onChange={setPassword}
             autoComplete="new-password"
           />
           <PasswordField
-            label="确认新密码"
+            label={uiText("确认新密码")}
             value={confirmation}
             onChange={setConfirmation}
             autoComplete="new-password"
@@ -718,7 +706,7 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
             className="quiet-button"
             disabled={busy || (!account.trusted_local && !oldPassword) || !password || !confirmation}
           >
-            {account.trusted_local ? "设置密码并关闭免账号登录" : "修改密码"}
+            {account.trusted_local ? uiText("设置密码并关闭免账号登录") : uiText("修改密码")}
           </button>
         </fieldset>
       </form>
@@ -728,7 +716,7 @@ export function AccountSettings({ busy: environmentBusy, onDirty }) {
       {!account.trusted_local && <AccountDeviceSettings />}
       <p className="account-settings-note">
         <LockKeyhole size={15} />
-        {isRemoteClient() ? "账户、应用资料与登录凭据保存在当前云端主机。" : "一个本地账户，一个持久工作环境。资料与凭据不上传到 Cage 服务器。"}
+        {isRemoteClient() ? uiText("账户、应用资料与登录凭据保存在当前云端主机。") : uiText("一个本地账户，一个持久工作环境。资料与凭据不上传到 Cage 服务器。")}
       </p>
     </div>
   );
@@ -752,11 +740,11 @@ function TrustedDeviceSettings() {
   };
   return <form onSubmit={update}>
     <fieldset disabled={busy}>
-      <h4>记住我</h4>
-      <p className="field-help">{enabled ? "已信任此电脑，下次用当前系统用户打开时自动进入。手动锁定仍需验证，退出账户会撤销信任。" : "验证一次账户密码，信任此电脑，下次用当前系统用户打开时自动进入。"}</p>
-      {!enabled && <PasswordField label="验证账户密码" value={password} onChange={setPassword} autoComplete="current-password" />}
-      <button className="quiet-button" disabled={!enabled && !password}>{enabled ? "关闭记住我" : "信任此电脑"}</button>
-      {message && <p className="account-error" role="alert">{message}</p>}
+      <h4>{uiText("记住我")}</h4>
+      <p className="field-help">{enabled ? uiText("已信任此电脑，下次用当前系统用户打开时自动进入。手动锁定仍需验证，退出账户会撤销信任。") : uiText("验证一次账户密码，信任此电脑，下次用当前系统用户打开时自动进入。")}</p>
+      {!enabled && <PasswordField label={uiText("验证账户密码")} value={password} onChange={setPassword} autoComplete="current-password" />}
+      <button className="quiet-button" disabled={!enabled && !password}>{enabled ? uiText("关闭记住我") : uiText("信任此电脑")}</button>
+      {message && <p className="account-error" role="alert">{uiText(message)}</p>}
     </fieldset>
   </form>;
 }
@@ -767,9 +755,9 @@ function AccountDeviceSettings() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   if (!deviceSupport?.supported) return null;
-  if (!deviceSupport.device_status) return <section className="account-device-settings" aria-label="登录与解锁">
-    <h4>登录与解锁</h4>
-    <p className="field-help" role="status">当前应用启动器需要更新，无法检查快捷登录状态。请重新安装完整的 Cage 应用后再设置；现有授权已保留。</p>
+  if (!deviceSupport.device_status) return <section className="account-device-settings" aria-label={uiText("登录与解锁")}>
+    <h4>{uiText("登录与解锁")}</h4>
+    <p className="field-help" role="status">{uiText("当前应用启动器需要更新，无法检查快捷登录状态。请重新安装完整的 Cage 应用后再设置；现有授权已保留。")}</p>
   </section>;
   const states = deviceSupport.device_status || {};
   const description = (kind, fallback) => states[kind] === "missing"
@@ -787,21 +775,21 @@ function AccountDeviceSettings() {
     } catch (e) { setError(e.message); }
     finally { setBusy(false); }
   };
-  return <section className="account-device-settings" aria-label="登录与解锁">
-    <h4>登录与解锁</h4>
+  return <section className="account-device-settings" aria-label={uiText("登录与解锁")}>
+    <h4>{uiText("登录与解锁")}</h4>
     {!localDesktop() && <label className="account-device-option check-line">
       <input type="checkbox" checked={Boolean(account.devices?.automatic) && states.automatic === "available"} disabled={busy || states.automatic === "unavailable"}
         onChange={(event) => change("automatic", event.target.checked)} />
-      <span><strong>记住登录</strong><small>{description("automatic", "重新打开直接进入。手动锁定后仍需指纹或密码。")}</small></span>
+      <span><strong>{uiText("记住登录")}</strong><small>{description("automatic", "重新打开直接进入。手动锁定后仍需指纹或密码。")}</small></span>
     </label>}
     <label className="account-device-option check-line">
       <input type="checkbox" checked={Boolean(account.devices?.biometric) && credentialPresent(states.biometric)} disabled={busy || states.biometric === "unavailable" || (!deviceSupport.biometric_available && !credentialPresent(states.biometric))}
         onChange={(event) => change("biometric", event.target.checked)} />
-      <span><strong>使用 Touch ID 解锁</strong><small>{description("biometric", deviceSupport.biometric_available ? "手动锁定后，通过系统指纹验证进入。" : "请先在 macOS 系统设置中设置 Touch ID。")}</small></span>
+      <span><strong>{uiText("使用 Touch ID 解锁")}</strong><small>{description("biometric", deviceSupport.biometric_available ? "手动锁定后，通过系统指纹验证进入。" : "请先在 macOS 系统设置中设置 Touch ID。")}</small></span>
     </label>
-    {Object.values(states).includes("unavailable") && <button type="button" className="quiet-button" disabled={busy} onClick={recheckDevices}>重新检查快捷登录</button>}
-    <p className="field-help">退出账户会撤销本机快捷登录授权。密码始终可以用于解锁。</p>
-    {error && <p className="account-error" role="alert">{error}</p>}
-    {message && <p className="account-saved" role="status">{message}</p>}
+    {Object.values(states).includes("unavailable") && <button type="button" className="quiet-button" disabled={busy} onClick={recheckDevices}>{uiText("重新检查快捷登录")}</button>}
+    <p className="field-help">{uiText("退出账户会撤销本机快捷登录授权。密码始终可以用于解锁。")}</p>
+    {error && <p className="account-error" role="alert">{uiText(error)}</p>}
+    {message && <p className="account-saved" role="status">{uiText(message)}</p>}
   </section>;
 }

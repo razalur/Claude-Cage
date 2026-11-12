@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownToLine, RefreshCw } from "lucide-react";
 import { native, nativeAvailable } from "./api";
+import { uiText } from "./ui-language.mjs";
 
 const activePhases = new Set(["checking", "downloading", "downloaded", "verifying", "installing"]);
 const checkInterval = 6 * 60 * 60 * 1000;
@@ -139,7 +140,7 @@ export function AppUpdateButton({ updates }) {
           </>
         ) : failed ? <RefreshCw size={20} /> : <ArrowDownToLine size={20} />}
       </button>}
-      {(failure || startupFailure) && <div className="app-update-error" role="alert">{failure || startupFailure}{visible ? coolingDown ? "。请等待更新源恢复后重试。" : "。可点击更新按钮重试。" : ""}</div>}
+      {(failure || startupFailure) && <div className="app-update-error" role="alert">{uiText(failure || startupFailure)}{visible ? uiText(coolingDown ? "。请等待更新源恢复后重试。" : "。可点击更新按钮重试。") : ""}</div>}
     </>
   );
 }

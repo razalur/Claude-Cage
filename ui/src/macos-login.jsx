@@ -1,3 +1,4 @@
+import { uiFormat, uiText } from "./ui-language.mjs";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Maximize, ZoomIn } from "lucide-react";
@@ -300,12 +301,12 @@ export function MacOSLogin({ disabled, initialSetup = false, maintenance = "", l
   }
 
   return <>
-    <button type="button" ref={opener} disabled={disabled || opened} onClick={open}>{label || (initialSetup ? "打开客机系统设置" : maintenance ? "打开客机授权设置" : "登录客机账户")}</button>
-    {!opened && message && <span role="status">{message}</span>}
+    <button type="button" ref={opener} disabled={disabled || opened} onClick={open}>{label || (initialSetup ? uiText("打开客机系统设置") : maintenance ? uiText("打开客机授权设置") : uiText("登录客机账户"))}</button>
+    {!opened && message && <span role="status">{uiText(message)}</span>}
     {!opened && ["environment-update", "environment-restart"].includes(recovery) && onSettings &&
-      <button type="button" onClick={onSettings}>{recovery === "environment-update" ? "查看环境组件" : "打开环境设置"}</button>}
+      <button type="button" onClick={onSettings}>{recovery === "environment-update" ? uiText("查看环境组件") : uiText("打开环境设置")}</button>}
     {opened && createPortal(
-      <div className="mac-login-fullscreen" data-mode={initialSetup ? "setup" : maintenance ? "maintenance" : "login"} role="dialog" aria-modal="true" aria-label={initialSetup ? "首次设置虚拟 Mac" : maintenance ? "恢复客机系统权限" : "登录虚拟 Mac"}
+      <div className="mac-login-fullscreen" data-mode={initialSetup ? "setup" : maintenance ? "maintenance" : "login"} role="dialog" aria-modal="true" aria-label={initialSetup ? uiText("首次设置虚拟 Mac") : maintenance ? uiText("恢复客机系统权限") : uiText("登录虚拟 Mac")}
         onKeyDownCapture={(e) => {
           if (e.key === "F6") {
             e.preventDefault();
@@ -320,15 +321,15 @@ export function MacOSLogin({ disabled, initialSetup = false, maintenance = "", l
         }}>
         <div className="mac-login-panel">
         <header className="mac-login-heading">
-          <h2>{initialSetup ? "虚拟 Mac 的系统设置" : maintenance ? "恢复客机系统权限" : "登录 macOS 客机"}</h2>
-          <p>{initialSetup ? "按下方提示完成当前授权，Cage 会自动检查。可以随时返回设置指引继续处理。" : maintenance ? "在当前系统设置窗口中完成授权。切换到其他客机应用或锁定后，画面会结束。" : "输入客机账户密码，按回车登录。"}</p>
+          <h2>{initialSetup ? uiText("虚拟 Mac 的系统设置") : maintenance ? uiText("恢复客机系统权限") : uiText("登录 macOS 客机")}</h2>
+          <p>{initialSetup ? uiText("按下方提示完成当前授权，Cage 会自动检查。可以随时返回设置指引继续处理。") : maintenance ? uiText("在当前系统设置窗口中完成授权。切换到其他客机应用或锁定后，画面会结束。") : uiText("输入客机账户密码，按回车登录。")}</p>
         </header>
-        <div className="mac-login-tools" role="toolbar" aria-label="画面工具">
-          <button ref={back} onClick={() => end()}><ArrowLeft size={16} aria-hidden="true" />{initialSetup ? "返回设置指引" : "返回工作台"}</button>
-          <button aria-pressed={!zoomed} onClick={() => changeZoom(false)}><Maximize size={16} aria-hidden="true" />{initialSetup || maintenance ? "适配" : "完整画面"}</button>
-          <button aria-pressed={zoomed} onClick={() => changeZoom(true)}><ZoomIn size={16} aria-hidden="true" />{initialSetup || maintenance ? "放大" : "登录区域"}</button>
+        <div className="mac-login-tools" role="toolbar" aria-label={uiText("画面工具")}>
+          <button ref={back} onClick={() => end()}><ArrowLeft size={16} aria-hidden="true" />{initialSetup ? uiText("返回设置指引") : uiText("返回工作台")}</button>
+          <button aria-pressed={!zoomed} onClick={() => changeZoom(false)}><Maximize size={16} aria-hidden="true" />{initialSetup || maintenance ? uiText("适配") : uiText("完整画面")}</button>
+          <button aria-pressed={zoomed} onClick={() => changeZoom(true)}><ZoomIn size={16} aria-hidden="true" />{initialSetup || maintenance ? uiText("放大") : uiText("登录区域")}</button>
           {initialSetup && setupActions}
-          {initialSetup && managedCredential && <button disabled={!session} onClick={() => enqueue("fill-password",{})}>填写授权密码</button>}
+          {initialSetup && managedCredential && <button disabled={!session} onClick={() => enqueue("fill-password",{})}>{uiText("填写授权密码")}</button>}
           {!maintenance && (!initialSetup || managedCredential) && <button onClick={async () => {
             const owner = lease.current;
             try {
@@ -337,21 +338,21 @@ export function MacOSLogin({ disabled, initialSetup = false, maintenance = "", l
               setAuthorizationPassword(result.password); setMessage("");
             }
             catch (e) { if (lease.current === owner) setMessage(e.message); }
-          }}>{initialSetup ? "查看授权密码" : "查看客机密码"}</button>}
-          {authorizationPassword && <span className="mac-login-password">{authorizationPassword}<button onClick={() => setAuthorizationPassword("")}>隐藏</button></span>}
+          }}>{initialSetup ? uiText("查看授权密码") : uiText("查看客机密码")}</button>}
+          {authorizationPassword && <span className="mac-login-password">{authorizationPassword}<button onClick={() => setAuthorizationPassword("")}>{uiText("隐藏")}</button></span>}
         </div>
         {maintenance && <div className="mac-setup-hint">
-          {maintenance === "projects" && <p>Cage 会直接打开「文件系统扩展」面板。打开 macFUSE 和 macFUSE (local) 两个开关，Cage 会自动检查并重新连接项目。</p>}
-          {administrator && <p>系统要求管理员时，用户名填写 {administrator}。选中系统授权窗口的密码框后，点击「填写管理员密码」，再由你确认授权。</p>}
-          {administrator && <button type="button" onClick={() => enqueue("fill-password", {})}>填写管理员密码</button>}
+          {maintenance === "projects" && <p>{uiText("Cage 会直接打开「文件系统扩展」面板。打开 macFUSE 和 macFUSE (local) 两个开关，Cage 会自动检查并重新连接项目。")}</p>}
+          {administrator && <p>{uiFormat("系统要求管理员时，用户名填写 {0}。选中系统授权窗口的密码框后，点击「填写管理员密码」，再由你确认授权。", administrator)}</p>}
+          {administrator && <button type="button" onClick={() => enqueue("fill-password", {})}>{uiText("填写管理员密码")}</button>}
         </div>}
         {initialSetup && setupHint && <div className="mac-setup-hint">
           <p>{setupHint}</p>
-          <p role={setupError ? "alert" : "status"}>{setupStatus} 查看完整步骤或进入工作台时，点击「返回设置指引」。</p>
+          <p role={setupError ? "alert" : "status"}>{setupStatus} {uiText("查看完整步骤或进入工作台时，点击「返回设置指引」。")}</p>
         </div>}
         <input ref={keyboard} className="mac-login-keyboard" type="text" autoComplete="off" autoCapitalize="none"
           autoCorrect="off" spellCheck={false}
-          aria-label="客机登录键盘。按 F6 切换工具栏，按 Shift 加 Escape 返回工作台。"
+          aria-label={uiText("客机登录键盘。按 F6 切换工具栏，按 Shift 加 Escape 返回工作台。")}
           onKeyDown={guestKey}
           onBeforeInput={(e) => e.preventDefault()}
           onInput={(e) => { e.currentTarget.value = ""; }}
@@ -391,7 +392,7 @@ export function MacOSLogin({ disabled, initialSetup = false, maintenance = "", l
           {frame && <div className="mac-login-canvas" style={{
             width: Math.max(size.width, imageWidth), height: Math.max(size.height, imageHeight),
           }}>
-            <img ref={imageRef} key={maintenance ? frameTarget?.geometry : undefined} alt={initialSetup ? "Apple 客机首次系统设置" : maintenance ? "客机系统设置或授权窗口" : "Apple 客机登录屏幕"} draggable={false} src={frame}
+            <img ref={imageRef} key={maintenance ? frameTarget?.geometry : undefined} alt={initialSetup ? uiText("Apple 客机首次系统设置") : maintenance ? uiText("客机系统设置或授权窗口") : uiText("Apple 客机登录屏幕")} draggable={false} src={frame}
               style={{ width: imageWidth, height: imageHeight }}
               onLoad={(e) => {
                 if (e.currentTarget.naturalHeight) setAspect(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight);
@@ -400,9 +401,9 @@ export function MacOSLogin({ disabled, initialSetup = false, maintenance = "", l
           </div>}
         </div>
         {(visibleMessage || !frame) && <p className="mac-login-status" role={visibleMessage ? "alert" : "status"}>
-          {visibleMessage || (initialSetup ? "正在读取客机首次设置画面…" : maintenance ? "正在确认系统授权窗口…" : "正在确认客机登录画面…")}
+          {visibleMessage || (initialSetup ? uiText("正在读取客机首次设置画面…") : maintenance ? uiText("正在确认系统授权窗口…") : uiText("正在确认客机登录画面…"))}
         </p>}
-        {!initialSetup && !maintenance && <p className="mac-login-help">拖动画面可查看其他账户或提示</p>}
+        {!initialSetup && !maintenance && <p className="mac-login-help">{uiText("拖动画面可查看其他账户或提示")}</p>}
         </div>
       </div>, document.body)}
   </>;

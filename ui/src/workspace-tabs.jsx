@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import { shortcut } from "./platform.mjs";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -239,16 +240,14 @@ export function WorkspaceTabs({
   const actions = menu && (
     <div className="menu workspace-tab-menu"
       style={{ top: menu.top, left: menu.left }}
-      role="menu" aria-label="标签操作">
+      role="menu" aria-label={uiText("标签操作")}>
               <button
                 role="menuitem"
                 onClick={() => {
                   setMenu(null);
                   onRename(menu.tab);
                 }}
-              >
-                重命名标签
-              </button>
+              >{uiText("重命名标签")}</button>
               <button
                 role="menuitem"
                 onClick={() => {
@@ -257,7 +256,7 @@ export function WorkspaceTabs({
                 }}
               >
                 <Pin size={14} />
-                {saved[menu.tab.id]?.pinned ? "取消置顶" : "置顶标签"}
+                {saved[menu.tab.id]?.pinned ? uiText("取消置顶") : uiText("置顶标签")}
               </button>
               <button
                 role="menuitem"
@@ -266,8 +265,7 @@ export function WorkspaceTabs({
                   onClose(menu.tab);
                 }}
               >
-                <X size={15} />
-                关闭标签<kbd>{shortcut("⌘W")}</kbd>
+                <X size={15} />{uiText("关闭标签")}<kbd>{shortcut("⌘W")}</kbd>
               </button>
     </div>
   );
@@ -297,7 +295,7 @@ export function WorkspaceTabs({
           const title = tabName(tab, saved);
           const opening = Boolean(openingSession) && openingSession === tab.cli_session_id;
           const runningElsewhere = tab.sessionRunningElsewhere;
-          const runningNotice = "其他窗口运行中，退出原会话后可在 Cage 接续";
+          const runningNotice = uiText("其他窗口运行中，退出原会话后可在 Cage 接续");
           const openError = tab.historySession && sessionOpenError?.id === tab.cli_session_id ? sessionOpenError.message : "";
           const errorID = `session-open-error-${tab.cli_session_id}`;
           return (
@@ -337,7 +335,7 @@ export function WorkspaceTabs({
                 aria-busy={opening || undefined}
                 aria-describedby={openError ? errorID : undefined}
                 aria-description={runningElsewhere ? runningNotice : undefined}
-                aria-label={tab.claudeLabel ? `${title} · ${tab.claudeLabel}` : title}
+                aria-label={tab.claudeLabel ? `${title} · ${tab.claudeLabel}` : uiText(title)}
                 aria-selected={tab.historySession ? undefined : tab.id === active}
                 tabIndex={
                   tab.id === active ||
@@ -346,7 +344,7 @@ export function WorkspaceTabs({
                     : -1
                 }
                 disabled={tab.historySession ? busy || opening || runningElsewhere : !ready && tab.kind !== "terminal"}
-                title={runningElsewhere ? `${title}\n${runningNotice}` : tab.url ? `${title}\n${tab.url}` : [title, tab.claudeAccountNumber && `账号 ${tab.claudeAccountNumber}`, tab.claudeLabel].filter(Boolean).join(" · ")}
+                title={runningElsewhere ? `${title}\n${runningNotice}` : tab.url ? `${title}\n${tab.url}` : [title, tab.claudeAccountNumber && uiFormat("账号 {0}", tab.claudeAccountNumber), tab.claudeLabel].filter(Boolean).join(" · ")}
                 onClick={() => onSelect(tab.id)}
                 onContextMenu={(event) => showMenu(tab, event)}
                 onKeyDown={(event) => {
@@ -383,27 +381,27 @@ export function WorkspaceTabs({
                 <TabIcon kind={tab.kind} favicon={tab.favicon} size={15}
                   agent={tab.terminalKind === "claude" || tab.terminalKind === "claude-login" || Boolean(tab.cli_session_id) || Boolean(tab.claude_account_id)}
                   accountNumber={tab.claudeAccountNumber} />
-                <span>{title}</span>
+                <span>{uiText(title)}</span>
                 {tab.claudeLabel && <small className="claude-tab-profile">{tab.claudeLabel}</small>}
                 {saved[tab.id]?.pinned && <Pin size={11} className="tab-pin" />}
                 {!horizontal && !vertical && (runningElsewhere || tab.sessionActive || opening) &&
-                  <LoaderCircle size={13} className="spin session-activity" role="img" aria-label={runningElsewhere ? "其他窗口运行中" : opening ? "正在打开会话" : "会话正在运行"} />}
+                  <LoaderCircle size={13} className="spin session-activity" role="img" aria-label={runningElsewhere ? uiText("其他窗口运行中") : opening ? uiText("正在打开会话") : uiText("会话正在运行")} />}
               </button>
               {horizontal || vertical ? (
                 <button
                   className="tab-close icon-button"
-                  aria-label={`关闭 ${title}`}
+                  aria-label={uiFormat("关闭 {0}", title)}
                   disabled={busy}
                   onClick={() => onClose(tab)}
                 >
                   <X size={14} />
                 </button>
               ) : (
-                <div className="terminal-row-actions" role="group" aria-label={`${title} 的操作`}>
-                  <TerminalAction label={saved[tab.id]?.pinned ? "取消置顶" : "置顶"}
+                <div className="terminal-row-actions" role="group" aria-label={uiFormat("{0} 的操作", title)}>
+                  <TerminalAction label={saved[tab.id]?.pinned ? uiText("取消置顶") : uiText("置顶")}
                     icon={saved[tab.id]?.pinned ? PinOff : Pin} disabled={busy} onClick={() => onPin(tab.id)} />
-                  <TerminalAction label="重命名" icon={Pencil} disabled={busy} onClick={() => onRename(tab)} />
-                  <TerminalAction label={tab.cli_session_id ? "归档" : "关闭终端"} icon={tab.cli_session_id ? Archive : X} disabled={busy} onClick={event => onClose(tab, event.currentTarget)} />
+                  <TerminalAction label={uiText("重命名")} icon={Pencil} disabled={busy} onClick={() => onRename(tab)} />
+                  <TerminalAction label={tab.cli_session_id ? uiText("归档") : uiText("关闭终端")} icon={tab.cli_session_id ? Archive : X} disabled={busy} onClick={event => onClose(tab, event.currentTarget)} />
                 </div>
               )}
             </div>
@@ -416,8 +414,8 @@ export function WorkspaceTabs({
         <div className="browser-all-tabs">
           <button
             className="icon-button"
-            aria-label="搜索标签页"
-            title="搜索标签页"
+            aria-label={uiText("搜索标签页")}
+            title={uiText("搜索标签页")}
             aria-expanded={allOpen}
             onClick={(event) => {
               trigger.current = event.currentTarget;
@@ -433,18 +431,18 @@ export function WorkspaceTabs({
               <div
                 className="menu all-tabs-menu"
                 role="dialog"
-                aria-label="搜索标签页"
+                aria-label={uiText("搜索标签页")}
               >
                 <input
                   autoFocus
-                  aria-label="搜索已打开的标签页"
-                  placeholder="搜索标签页"
+                  aria-label={uiText("搜索已打开的标签页")}
+                  placeholder={uiText("搜索标签页")}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                 />
                 <div className="all-tabs-results">
                   {matchingTabs.length === 0 && (
-                    <p className="favorites-empty">没有匹配的标签页</p>
+                    <p className="favorites-empty">{uiText("没有匹配的标签页")}</p>
                   )}
                   {matchingTabs.map((tab) => (
                     <button
@@ -460,7 +458,7 @@ export function WorkspaceTabs({
                         accountNumber={tab.claudeAccountNumber} />
                       <span>{tabName(tab, saved)}</span>
                       {tab.id === active && (
-                        <span className="current-tab-marker">当前</span>
+                        <span className="current-tab-marker">{uiText("当前")}</span>
                       )}
                     </button>
                   ))}

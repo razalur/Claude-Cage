@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 
 export function Modal({ title, children, onClose, wide = false, footer, anchor }) {
@@ -97,14 +98,14 @@ export function Modal({ title, children, onClose, wide = false, footer, anchor }
         className={`modal ${wide ? "wide" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={uiText(title)}
       >
         <header className="modal-head">
-          <h2>{title}</h2>
+          <h2>{uiText(title)}</h2>
           {onClose && (
             <button
               className="icon-button close-modal"
-              aria-label="关闭面板"
+              aria-label={uiText("关闭面板")}
               onClick={onClose}
             >
               ×

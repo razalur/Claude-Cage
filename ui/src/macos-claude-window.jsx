@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import { uiText } from "./ui-language.mjs";
 import { DesktopToolbar, useDesktopZoom } from "./claude-desktop";
 import { MacOSLogin } from "./macos-login";
 import { api, native, nativeAvailable } from "./api";
@@ -282,7 +283,7 @@ export function MacOSClaudeWindow({ visible, keyboard = "mac", remoteRef, sideba
     <DesktopToolbar desktop={state} platform="macOS" zoom={zoom} setZoom={setZoom} onConfirm={onConfirm}
       onStop={() => action("stop")} refresh={() => refresh(n => n+1)} sidebarCollapsed={sidebarCollapsed} onExpand={onExpand}>
       <MacOSLogin />
-      <button disabled={!state?.input || !image || transferring} onClick={() => void chooseFiles()}>添加附件</button>
+      <button disabled={!state?.input || !image || transferring} onClick={() => void chooseFiles()}>{uiText("添加附件")}</button>
       <input ref={picker} type="file" multiple hidden aria-label="选择 Claude 附件" onChange={event => { const files = Array.from(event.target.files || []); event.target.value = ""; if (files.length) void receive({ files, kind: "paste" }, pickerTarget.current || undefined).catch(fileFailure); }} />
       {(!state?.running || error) && <button onClick={() => action("launch")} disabled={!state?.installed}>{state?.running ? "重新连接应用" : "打开应用"}</button>}
       {state?.installed && !state.screen && <button onClick={() => action("request-screen")}>授权窗口画面</button>}

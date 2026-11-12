@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import { shortcut, primaryModifier } from "./platform.mjs";
 import logo from "./logo.png";
 import React, { useEffect, useRef, useState } from "react";
@@ -267,9 +268,9 @@ function App() {
     terminal && !showHome ? current.workspace : workspace;
   const setupProxy = !nativeGuestLabel && needsProxySetup(settings, status, proxy);
   const network = connectionError
-    ? { mode: "unknown", label: "外网状态待确认" }
+    ? { mode: "unknown", label: uiText("外网状态待确认") }
     : networkState(status);
-  const runtimeLabel = connectionError
+  const runtimeLabel = uiText(connectionError
     ? "连接中断"
     : busy
       ? network.mode === "checking" || status?.job?.kind === "safety"
@@ -285,7 +286,7 @@ function App() {
           : "离线可用"
         : running
           ? status?.environment_update_required ? "环境待更新" : "浏览器待恢复"
-          : "已停止";
+          : "已停止");
   const notify = (text) => setToast(text);
   const clipboardConnection = getClientContext().connection_id;
   useEffect(() => {
@@ -387,7 +388,7 @@ function App() {
                 incognito,
                 kind: "web",
                 url,
-                title: "新标签页",
+                title: uiText("新标签页"),
               },
             ],
       );
@@ -483,7 +484,7 @@ function App() {
     }
   };
   const archiveSession = async (session, anchor) => {
-    await confirm({title:"归档这段会话？", body:"归档会关闭关联终端。历史将保留，可从设置中的已归档会话恢复。", confirm:"归档会话", pendingLabel:"正在归档…", anchor,
+    await confirm({title:uiText("归档这段会话？"), body:uiText("归档会关闭关联终端。历史将保留，可从设置中的已归档会话恢复。"), confirm:uiText("归档会话"), pendingLabel:uiText("正在归档…"), anchor,
       submit: async () => {
         await api("/cli/sessions/" + session.id + "/archive", {});
         setTabs(list => list.filter(tab => tab.cli_session_id !== session.id));
@@ -522,7 +523,7 @@ function App() {
                 kind: "editor",
                 workspace: path,
                 url: `http://127.0.0.1:18080/?folder=${encodeURIComponent(path)}`,
-                title: "文件编辑器",
+                title: uiText("文件编辑器"),
               },
             ],
       );
@@ -535,9 +536,9 @@ function App() {
       if (
         !tab.closed &&
         !(await confirm({
-          title: "关闭这个终端会话？",
-          body: "该终端中的交互命令可能被中断。网页和其他终端不受影响。",
-          confirm: "关闭终端",
+          title: uiText("关闭这个终端会话？"),
+          body: uiText("该终端中的交互命令可能被中断。网页和其他终端不受影响。"),
+          confirm: uiText("关闭终端"),
         }))
       )
         return;
@@ -551,9 +552,9 @@ function App() {
       if (
         tab.kind === "editor" &&
         !(await confirm({
-          title: "关闭文件编辑器？",
-          body: "请先保存未完成的修改。文件仍保留在共享项目中。",
-          confirm: "关闭编辑器",
+          title: uiText("关闭文件编辑器？"),
+          body: uiText("请先保存未完成的修改。文件仍保留在共享项目中。"),
+          confirm: uiText("关闭编辑器"),
         }))
       )
         return;
@@ -602,9 +603,9 @@ function App() {
   const stop = async () => {
     if (
       await confirm({
-        title: setupProgress ? "停止安装环境？" : "停止当前环境？",
-        body: setupProgress ? "当前安装任务会停止。下次启动环境时可以继续安装。" : "请先保存文件。当前终端会话会结束，浏览器登录和项目文件会保留。",
-        confirm: setupProgress ? "停止安装" : "停止环境",
+        title: setupProgress ? uiText("停止安装环境？") : uiText("停止当前环境？"),
+        body: setupProgress ? uiText("当前安装任务会停止。下次启动环境时可以继续安装。") : uiText("请先保存文件。当前终端会话会结束，浏览器登录和项目文件会保留。"),
+        confirm: setupProgress ? uiText("停止安装") : uiText("停止环境"),
       })
     )
       await action("/stop");
@@ -1030,18 +1031,18 @@ function App() {
         }
         if (connectionError || fatal) {
           setDialog({
-            title: "退出 Cage",
-            body: "工作台连接已中断，暂时无法确认环境状态。仍在运行的后台任务会继续。",
-            confirm: "仅退出桌面应用",
+            title: uiText("退出 Cage"),
+            body: uiText("工作台连接已中断，暂时无法确认环境状态。仍在运行的后台任务会继续。"),
+            confirm: uiText("仅退出桌面应用"),
             resolve: (confirmed) => confirmed && native("quitNow"),
           });
           return;
         }
         setDialog({
-          title: "退出 Cage",
-          body: "退出前请保存文件和设置。可以保留环境，让后台任务继续运行；下次打开会重新连接。",
-          confirm: "停止环境并退出",
-          secondary: "保留运行并退出",
+          title: uiText("退出 Cage"),
+          body: uiText("退出前请保存文件和设置。可以保留环境，让后台任务继续运行；下次打开会重新连接。"),
+          confirm: uiText("停止环境并退出"),
+          secondary: uiText("保留运行并退出"),
           resolve: async (result) => {
             if (result === "secondary") {
               await native("quitNow");
@@ -1090,7 +1091,7 @@ function App() {
   const claudeLabels = new Map(claudeProfiles.accounts?.map((account) => [account.id, account.label || account.email]));
   const claudeNumbers = new Map(claudeProfiles.accounts?.map((account, index) => [account.id, index + 1]));
   const terminalAccountName = (tab) => claudeLabels.get(tab.claude_account_id) ||
-    (tab.terminalKind === "claude-login" ? "新账号登录" : tab.claude_account_id ? "Claude 账号" : "");
+    uiText(tab.terminalKind === "claude-login" ? "新账号登录" : tab.claude_account_id ? "Claude 账号" : "");
   const displayTabs = orderedTabs(tabs, metadata).map((tab) =>
     tab.claude_account_id || tab.terminalKind === "claude-login" ? { ...tab,
       claudeLabel: terminalAccountName(tab), claudeAccountNumber: claudeNumbers.get(tab.claude_account_id) } : tab);
@@ -1193,19 +1194,19 @@ function App() {
   const terminalHeader = tab => {
     const path = tab?.workspace || workspace;
     const account = tab?.claude_account_id && terminalAccountName(tab);
-    const detail = tab?.terminalKind === "claude-login" ? `登录 · ${account || "新账号"}`
-      : account ? `Claude · ${account}${tab.claude_account_source === "default" ? "（启动时账号）" : ""}` : "";
+    const detail = tab?.terminalKind === "claude-login" ? uiFormat("登录 · {0}", account || uiText("新账号"))
+      : account ? `Claude · ${account}${tab.claude_account_source === "default" ? uiText("（启动时账号）") : ""}` : "";
     const location = split && tab ? `heading-${tab.id}` : "heading";
     return <TerminalHeader tab={tab} project={projectName(path, status?.environment_directory)} metadata={metadata}
       contentWorkspace={path} terminalDetail={detail} terminalDetailHint={tab?.claude_account_source === "default"
-        ? "此终端按启动时的普通终端登录标记。若普通终端已换号，请重新打开工作会话确认身份。" : detail}
+        ? uiText("此终端按启动时的普通终端登录标记。若普通终端已换号，请重新打开工作会话确认身份。") : detail}
       busy={busy} onHome={() => setHome(true)}
       sidebarButton={sidebarButton(paneSide(tab?.id))} exitButton={expandButton(tab)}
       location={location} triggerRef={!tab || tab.id === active ? terminalTrigger : undefined}
       menu={terminalMenuAt(location)} onClose={() => closeTab(tab)} />;
   };
   const recoverEditor = async tab => {
-    if (!(await confirm({ title: "重启编辑器？", body: "请先保存文件。浏览器、终端和环境会继续运行。", confirm: "重启编辑器" }))) return;
+    if (!(await confirm({ title: uiText("重启编辑器？"), body: uiText("请先保存文件。浏览器、终端和环境会继续运行。"), confirm: uiText("重启编辑器") }))) return;
     setRecoveringEditor(true);
     try { await api("/browser/editor-restart", { workspace: tab.workspace || workspace }); notify("编辑器已恢复"); }
     catch (error) { notify(error.message); }
@@ -1246,12 +1247,12 @@ function App() {
       )}
       {dialog && (
         <Modal
-          title={dialog.title}
+          title={uiText(dialog.title)}
           anchor={dialog.anchor}
           onClose={dialog.pending ? undefined : () => finishDialog(false)}
           footer={
             <>
-              <button disabled={dialog.pending} onClick={() => finishDialog(false)}>取消</button>
+              <button disabled={dialog.pending} onClick={() => finishDialog(false)}>{uiText("取消")}</button>
               {dialog.secondary && (
                 <button disabled={dialog.pending} onClick={() => finishDialog("secondary")}>
                   {dialog.secondary}
@@ -1271,17 +1272,15 @@ function App() {
       )}
       {quitting && (
         <Modal
-          title={quitting.error ? "未能完成退出" : "正在停止环境"}
+          title={quitting.error ? uiText("未能完成退出") : uiText("正在停止环境")}
           onClose={cancelAutomaticExit}
           footer={
             <>
               <button onClick={cancelAutomaticExit}>
-                {quitting.error ? "留在 Cage" : "取消自动退出"}
+                {quitting.error ? uiText("留在 Cage") : uiText("取消自动退出")}
               </button>
               {quitting.error && (
-                <button className="primary" onClick={stopAndQuit}>
-                  重试停止并退出
-                </button>
+                <button className="primary" onClick={stopAndQuit}>{uiText("重试停止并退出")}</button>
               )}
             </>
           }
@@ -1291,17 +1290,17 @@ function App() {
             role={quitting.error ? "alert" : "status"}
           >
             <p>
-              {quitting.error ||
+              {uiText(quitting.error) ||
                 (connectionError
-                  ? "正在恢复工作台连接，恢复后会继续确认停止结果。"
-                  : "停止完成后 Cage 会自动退出。取消自动退出只保留窗口，环境仍会停止。")}
+                  ? uiText("正在恢复工作台连接，恢复后会继续确认停止结果。")
+                  : uiText("停止完成后 Cage 会自动退出。取消自动退出只保留窗口，环境仍会停止。"))}
             </p>
             {!quitting.error && (
               <p>
                 <LoaderCircle size={16} className="spin" />{" "}
                 {status?.job?.running
-                  ? status.job.message
-                  : "正在确认环境已停止…"}
+                  ? uiText(status.job.message)
+                  : uiText("正在确认环境已停止…")}
               </p>
             )}
           </div>
@@ -1314,10 +1313,9 @@ function App() {
       <>
         <div className="boot-screen">
           <Shield size={36} />
-          <h1>连接 Cage 工作台</h1>
+          <h1>{uiText("连接 Cage 工作台")}</h1>
           <p>{fatal}</p>
-          <p className="muted">
-            请从 Cage 应用打开，或在终端运行 <code>cage desktop</code>。
+          <p className="muted">{uiText("请从 Cage 应用打开，或在终端运行")} <code>cage desktop</code>。
           </p>
           <button
             className="primary"
@@ -1325,7 +1323,7 @@ function App() {
               nativeAvailable() ? native("reconnect") : location.reload()
             }
           >
-            重新连接
+            {uiText("重新连接")}
           </button>
         </div>
         {dialogs}
@@ -1338,9 +1336,7 @@ function App() {
           <div className="brand-mark">C</div>
           <h1>Cage</h1>
           <p>
-            <LoaderCircle size={16} className="spin" />
-            正在连接工作区…
-          </p>
+            <LoaderCircle size={16} className="spin" />{uiText("正在连接工作区…")}</p>
         </div>
         {dialogs}
       </>
@@ -1411,24 +1407,20 @@ function App() {
         <div className="workbench-main">
           {showHome && terminalHeader(null)}
           {browserError && running && !connectionError && <div className="connection-banner" role="status">
-            <span>客机浏览器暂时无法连接。{browserError}</span>
-            <button onClick={() => refreshStatus.current?.()}>重试</button>
+            <span>{uiText("客机浏览器暂时无法连接。")}{browserError}</span>
+            <button onClick={() => refreshStatus.current?.()}>{uiText("重试")}</button>
           </div>}
           {connectionError && (
-            <div className="connection-banner" role="alert">
-              工作台连接中断，后台状态暂时未知。
-              <button
+            <div className="connection-banner" role="alert">{uiText("工作台连接中断，后台状态暂时未知。")}<button
                 onClick={() =>
                   nativeAvailable() ? native("reconnect") : location.reload()
                 }
-              >
-                重新连接工作台
-              </button>
+              >{uiText("重新连接工作台")}</button>
             </div>
           )}
           <main className={`workspace ${split ? "workspace-split" : ""}`} ref={workspaceBox}
             style={{ "--split-left": `${100 * (dualBrowser && nativeSplit?.fraction || 0.5)}%` }}>
-            {dropSide && <div aria-hidden="true" className={`split-drop split-${dropSide}`}>{dropSide === "left" ? "放到左侧" : "放到右侧"}</div>}
+            {dropSide && <div aria-hidden="true" className={`split-drop split-${dropSide}`}>{dropSide === "left" ? uiText("放到左侧") : uiText("放到右侧")}</div>}
             {!storageRecovery && desktopOpen && macGuest && <MacOSClaudeWindow uploads={desktopFiles.uploads} keyboard={status.keyboard} remoteRef={remote}
               onStatus={notify} onFallback={(text, message) => setTransfer({ text, message })} visible={!settingsOpen} onConfirm={confirm}
               sidebarCollapsed={sidebarCollapsed} onExpand={() => persist("cage-sidebar-collapsed", false, setSidebarCollapsed)} />}
@@ -1443,8 +1435,8 @@ function App() {
             />}
             {status.environment_update_required && !busy && (
               <div className="environment-update-banner" role="status">
-                <span>{status.environment_update_error || "环境组件需要更新。请先保存编辑器中的文件。"}</span>
-                <button onClick={() => openSettings("project")}>查看并更新</button>
+                <span>{status.environment_update_error || uiText("环境组件需要更新。请先保存编辑器中的文件。")}</span>
+                <button onClick={() => openSettings("project")}>{uiText("查看并更新")}</button>
               </div>
             )}
             {!storageRecovery && (status.vm_running || terminal) && (
@@ -1478,11 +1470,11 @@ function App() {
                         tabId={liveBrowser?.id} onStatus={notify}
                         onFallback={(text, message) => setTransfer({ text, message })} />}
                       {!status.ready && <div className="view-overlay">
-                        <RefreshCw /><h3>浏览器连接暂时不可用</h3>
-                        <p>环境和终端仍可运行；恢复浏览器不会停止现有终端。</p>
-                        <button className="primary" disabled={busy} onClick={() => setStartOptions({})}>恢复浏览器</button>
+                        <RefreshCw /><h3>{uiText("浏览器连接暂时不可用")}</h3>
+                        <p>{uiText("环境和终端仍可运行；恢复浏览器不会停止现有终端。")}</p>
+                        <button className="primary" disabled={busy} onClick={() => setStartOptions({})}>{uiText("恢复浏览器")}</button>
                       </div>}
-                      {status.ready && !splitReady && <div className="view-overlay">正在调整浏览器布局…</div>}
+                      {status.ready && !splitReady && <div className="view-overlay">{uiText("正在调整浏览器布局…")}</div>}
                     </div>
                   </section>
                 )}
@@ -1516,31 +1508,31 @@ function App() {
                 <div className="welcome-content">
                   <img className="welcome-logo" src={logo} alt="Cage" />
                   {storageRecovery ? <>
-                    <h1>环境存储需要恢复</h1>
+                    <h1>{uiText("环境存储需要恢复")}</h1>
                     <p className="welcome-subtitle"><SafetyMessage message={status.storage_recovery.error} /></p>
-                    <p className="field-help">在设置中恢复环境存储后，再启动浏览器和终端。诊断包可以从同一页面导出。</p>
-                    <button className="primary" onClick={() => openSettings("project")}>恢复环境存储</button>
+                    <p className="field-help">{uiText("在设置中恢复环境存储后，再启动浏览器和终端。诊断包可以从同一页面导出。")}</p>
+                    <button className="primary" onClick={() => openSettings("project")}>{uiText("恢复环境存储")}</button>
                   </> : setupProgress ? <>
-                    <h1>{status.job.error ? "环境安装未完成" : "正在安装 Cage 环境"}</h1>
+                    <h1>{uiText(status.job.error ? "环境安装未完成" : "正在安装 Cage 环境")}</h1>
                     <SetupProgress job={status.job} onDetails={() => setDetails(true)}
                       onStop={stop} onRetry={() => setStartOptions(status.job.kind === "guest-install" ? { guest_system: status.job.setup_progress.system } : {})} disconnected={Boolean(connectionError)} />
                   </> : <>
                   <h1>
                     {busy
                       ? status.job.kind === "stop"
-                        ? "正在停止 Cage 环境"
+                        ? uiText("正在停止 Cage 环境")
                         : status.job.kind === "storage"
-                          ? "正在调整环境存储"
+                          ? uiText("正在调整环境存储")
                         : status.job.kind === "project"
-                          ? "正在打开项目"
-                          : "正在准备 Cage 环境"
+                          ? uiText("正在打开项目")
+                          : uiText("正在准备 Cage 环境")
                       : running
                         ? !status.ready
-                          ? "Cage 环境正在连接"
-                          : "Cage 环境已就绪"
+                          ? uiText("Cage 环境正在连接")
+                          : uiText("Cage 环境已就绪")
                         : setupProxy
-                          ? "为 Claude 准备独立工作区"
-                          : "先启动 Cage 环境"}
+                          ? uiText("为 Claude 准备独立工作区")
+                          : uiText("先启动 Cage 环境")}
                   </h1>
                   <p className="welcome-subtitle">
                     <SafetyMessage message={busy
@@ -1549,14 +1541,14 @@ function App() {
                         ? !status.ready
                           ? status.environment_update_error || "浏览器连接尚未就绪，可以恢复连接或继续使用终端。"
                           : network.mode === "open"
-                            ? "环境已连接，网络检查通过。可以浏览网页或打开本地项目。"
-                            : `${network.label}。终端与本地文件仍可使用。`
+                            ? uiText("环境已连接，网络检查通过。可以浏览网页或打开本地项目。")
+                            : `${network.label}${uiText("。终端与本地文件仍可使用。")}`
                         : setupProxy
                           ? "先连接你的代理，再启动浏览器、终端和编辑器。无需安装额外的代理软件。"
-                          : "准备独立的浏览器和终端，完成网络检查后开始工作。"} />
+                          : uiText("准备独立的浏览器和终端，完成网络检查后开始工作。")} />
                   </p>
                   {!running && !nativeGuestLabel && (
-                    <ol className="onboarding-steps" aria-label="开始使用 Cage">
+                    <ol className="onboarding-steps" aria-label={uiText("开始使用 Cage")}>
                       {["配置代理", "启动环境", "开始工作"].map(
                         (label, index) => (
                           <li
@@ -1568,7 +1560,7 @@ function App() {
                             }
                           >
                             <span>{index + 1}</span>
-                            {label}
+                            {uiText(label)}
                           </li>
                         ),
                       )}
@@ -1581,18 +1573,18 @@ function App() {
                         size={24}
                       />
                       <span>
-                        <strong>Cage 隔离环境</strong>
+                        <strong>{uiText("Cage 隔离环境")}</strong>
                         <small>
                           {running
                             ? runtimeLabel
                             : setupProxy
-                              ? "自备代理订阅、YAML 配置或节点"
-                              : nativeGuestLabel ? `${nativeGuestLabel} 客机已安装` : "代理已配置，首次启动会下载开发环境"}
+                              ? uiText("自备代理订阅、YAML 配置或节点")
+                              : nativeGuestLabel ? uiFormat("{0} 客机已安装", nativeGuestLabel) : uiText("代理已配置，首次启动会下载开发环境")}
                         </small>
                       </span>
                     </div>
                     {!busy && !running && !account?.guest_system && status.local_vm_storage && !isRemoteClient() && <GuestSystemPicker system={guestSystem} onChange={setGuestSystem} />}
-                    {!running && !nativeGuestLabel && status.local_vm_storage && !isRemoteClient() && <button className="storage-entry text-button" disabled={busy} onClick={() => openSettings("project")}>选择环境存储位置</button>}
+                    {!running && !nativeGuestLabel && status.local_vm_storage && !isRemoteClient() && <button className="storage-entry text-button" disabled={busy} onClick={() => openSettings("project")}>{uiText("选择环境存储位置")}</button>}
                     <div className="start-project-footer">
                       <span>
                         <i className={`status-dot ${network.mode}`} />
@@ -1601,8 +1593,8 @@ function App() {
                           : running
                             ? network.label
                             : setupProxy
-                              ? "等待配置代理"
-                              : "环境已停止"}
+                              ? uiText("等待配置代理")
+                              : uiText("环境已停止")}
                       </span>
                       <button
                         className="primary"
@@ -1638,17 +1630,17 @@ function App() {
                           <TerminalSquare size={16} />
                         )}
                         {busy
-                          ? "正在处理…"
+                          ? uiText("正在处理…")
                           : !running
                             ? setupProxy
-                              ? "配置网络与代理"
-                              : guestSystem?.activate ? "打开工作台" : guestSystem?.pending ? "继续安装" :
-                                guestSystem && guestSystem.guest_system !== "debian-13" ? "安装客户机" : "启动 Cage 环境"
+                              ? uiText("配置网络与代理")
+                              : guestSystem?.activate ? uiText("打开工作台") : guestSystem?.pending ? uiText("继续安装") :
+                                guestSystem && guestSystem.guest_system !== "debian-13" ? uiText("安装客户机") : uiText("启动 Cage 环境")
                             : !status.ready
-                              ? "恢复浏览器"
+                              ? uiText("恢复浏览器")
                               : status.environment_workspace
-                                ? "打开项目"
-                                : "新建终端"}
+                                ? uiText("打开项目")
+                                : uiText("新建终端")}
                       </button>
                     </div>
                     {terminalMenuAt("start")}
@@ -1658,14 +1650,14 @@ function App() {
                       {macGuest && <MacOSLogin disabled={!status.ready || busy} />}
                       <button onClick={newTerminalHere} data-terminal-location="shortcuts" aria-haspopup="menu" disabled={busy}>
                         <TerminalSquare size={16} />
-                        新建终端
+                        {uiText("新建终端")}
                       </button>
                       <button
                         onClick={() => openEditor(contentWorkspace)}
                         disabled={!status.ready || busy}
                       >
                         <FileCode2 size={16} />
-                        浏览文件
+                        {uiText("浏览文件")}
                       </button>
                     </div>
                   )}
@@ -1673,30 +1665,30 @@ function App() {
                   {!running && !nativeGuestLabel && (
                     <p className="welcome-hint">
                       {setupProxy
-                        ? "Cage 不提供代理或 Claude 账户。连接后，在 Cage 内完成 Claude 登录。"
-                        : "首次安装时可在操作详情中查看下载和配置进度；中断后可以继续安装。"}
+                        ? uiText("Cage 不提供代理或 Claude 账户。连接后，在 Cage 内完成 Claude 登录。")
+                        : uiText("首次安装时可在操作详情中查看下载和配置进度；中断后可以继续安装。")}
                     </p>
                   )}
                   {running && status.ready && (
                     <p className="welcome-hint">
-                      打开项目后，在终端输入 <code>claude</code>
-                      ，按提示登录你的账户。
+                      {uiText("打开项目后，在终端输入")} <code>claude</code>
+                      {uiText("，按提示登录你的账户。")}
                       <br />
-                      {isRemoteClient() ? "默认工作区和打开的项目位于云端，编辑和删除会直接影响云端文件。" : "默认工作区和打开的项目与本机共享，编辑和删除文件会同步。"}
+                      {isRemoteClient() ? uiText("默认工作区和打开的项目位于云端，编辑和删除会直接影响云端文件。") : uiText("默认工作区和打开的项目与本机共享，编辑和删除文件会同步。")}
                     </p>
                   )}
                   </>}
                   {status.project_error && (
                     <div className="start-error" role="alert">
-                      <strong>部分项目文件夹尚未连接</strong>
-                      <p>环境和浏览器可继续使用。</p>
+                      <strong>{uiText("部分项目文件夹尚未连接")}</strong>
+                      <p>{uiText("环境和浏览器可继续使用。")}</p>
                       {status.project_errors?.length ? (
                         <ul className="project-connection-errors">
                           {status.project_errors.map(({ path, message, recovery }) => (
                             <li key={path}>
                               <strong>{projectName(path, status.environment_directory)}</strong>
                               <span className="project-error-path">{path}</span>
-                              <p>{message}</p>
+                              <p>{uiText(message)}</p>
                               <ProjectRecovery recovery={recovery} disabled={!status.ready || busy}
                                 onRetry={() => setProjectDialog({ path })} onSettings={() => openSettings("project")} />
                             </li>
@@ -1707,15 +1699,13 @@ function App() {
                   )}
                   {!storageRecovery && !setupProgress && status.job?.error && (
                     <div className="start-error" role="alert">
-                      <strong>{status.job.message || "本次操作未完成"}</strong>
+                      <strong>{uiText(status.job.message) || uiText("本次操作未完成")}</strong>
                       <p><SafetyMessage message={status.job.error} /></p>
                       {status.can_restore && (
                         <button
                           className="text-button"
                           onClick={() => openSettings("project")}
-                        >
-                          查看恢复选项
-                        </button>
+                        >{uiText("查看恢复选项")}</button>
                       )}
                     </div>
                   )}
@@ -1724,7 +1714,7 @@ function App() {
                       className="text-button details-link"
                       onClick={() => setDetails(true)}
                     >
-                      查看操作详情
+                      {uiText("查看操作详情")}
                     </button>
                   )}
                 </div>
@@ -1733,33 +1723,33 @@ function App() {
           </main>
           <footer className="status-bar">
             {sidebarCollapsed && <AppUpdateButton updates={appUpdates} />}
-            <button onClick={() => setSafetyOpen(true)} title="网络与隔离检查">
+            <button onClick={() => setSafetyOpen(true)} title={uiText("网络与隔离检查")}>
               <EnvironmentShield
                 size={14}
                 healthy={status.ready && network.mode === "open"}
               />
-              <span>{running ? network.label : "网络检查"}</span>
+              <span>{running ? network.label : uiText("网络检查")}</span>
             </button>
             <span className="status-divider" />
             <button onClick={() => openSettings("network")}>
               <MapPin size={12} />
               <span>
                 {status.network_error
-                  ? "出口待确认"
+                  ? uiText("出口待确认")
                   : status.location || status.safety?.exit_ip
                     ? [
                         status.safety?.exit_ip || status.location?.ip,
                         status.location?.country,
                         status.location?.city,
                       ].filter(Boolean).join(" · ")
-                    : "指定代理出口"}
+                    : uiText("指定代理出口")}
               </span>
             </button>
             <span className="status-divider" />
             <button onClick={() => openSettings("region")}>
               <Clock3 size={12} />
               {settings.timezone}
-              {settings.auto_timezone ? " · 自动" : ""}
+              {settings.auto_timezone ? uiText(" · 自动") : ""}
             </button>
             <span className="status-divider" />
             <NetworkLatency
@@ -1773,7 +1763,7 @@ function App() {
             <span className="status-feedback" role="status">
               <SafetyMessage message={toast ||
                 (busy
-                  ? status.job.message
+                  ? uiText(status.job.message)
                   : running
                     ? status.ready
                       ? isRemoteClient() ? "文件保存在云端" : "文件与本机同步"
@@ -1781,7 +1771,7 @@ function App() {
                     : "")} />
             </span>
             {status.job?.log && (
-              <button title="操作详情" onClick={() => setDetails(true)}>
+              <button title={uiText("操作详情")} onClick={() => setDetails(true)}>
                 <MoreHorizontal size={15} />
               </button>
             )}
@@ -1790,10 +1780,10 @@ function App() {
               disabled={
                 Boolean(startRequest) || (!running && !busy) || (status?.job?.kind === "stop" && busy)
               }
-              title="停止当前环境"
+              title={uiText("停止当前环境")}
             >
               <Power size={12} />
-              <span>停止环境</span>
+              <span>{uiText("停止环境")}</span>
             </button>
           </footer>
         </div>
@@ -1815,7 +1805,7 @@ function App() {
       {tailscaleOpen && <TailscalePanel status={status} onClose={() => setTailscaleOpen(false)}
         onConfirm={confirm} onInstall={async () => {
           const nativeGuest = ["macos", "windows-11"].includes(status.guest_system);
-          if (nativeGuest && !await confirm({ title: "更新环境组件？", body: "更新会重新连接浏览器和显示组件，请先保存工作。设备身份、公钥和个人数据保留。", confirm: "更新组件" })) return;
+          if (nativeGuest && !await confirm({ title: uiText("更新环境组件？"), body: uiText("更新会重新连接浏览器和显示组件，请先保存工作。设备身份、公钥和个人数据保留。"), confirm: uiText("更新组件") })) return;
           await action(nativeGuest ? "/environment/update" : "/tailscale/install", {});
         }}
         onOpenBrowser={async url => { const result = await openBrowserPage(url, false); if (result) setTailscaleOpen(false); return Boolean(result); }} />}
@@ -1836,20 +1826,18 @@ function App() {
       )}
       {rename && (
         <Modal
-          title="重命名标签"
+          title={uiText("重命名标签")}
           onClose={() => setRename(null)}
           footer={
             <>
-              <span className="save-note">仅修改工作台中显示的名称</span>
-              <button onClick={() => setRename(null)}>取消</button>
+              <span className="save-note">{uiText("仅修改工作台中显示的名称")}</span>
+              <button onClick={() => setRename(null)}>{uiText("取消")}</button>
               <button
                 className="primary"
                 form="rename-tab"
                 type="submit"
                 disabled={!rename.title.trim()}
-              >
-                保存名称
-              </button>
+              >{uiText("保存名称")}</button>
             </>
           }
         >
@@ -1884,7 +1872,7 @@ function App() {
               setRename(null);
             }}
           >
-            <label htmlFor="tab-title">标签名称</label>
+            <label htmlFor="tab-title">{uiText("标签名称")}</label>
             <input
               id="tab-title"
               autoFocus
@@ -1899,28 +1887,26 @@ function App() {
       )}
       {transfer && (
         <Modal
-          title="文本传递"
+          title={uiText("文本传递")}
           onClose={() => setTransfer(null)}
           footer={
             <>
-              <span className="save-note">仅在你的操作下传递文本</span>
-              <button onClick={() => setTransfer(null)}>关闭</button>
+              <span className="save-note">{uiText("仅在你的操作下传递文本")}</span>
+              <button onClick={() => setTransfer(null)}>{uiText("关闭")}</button>
               <button
                 className="primary"
                 onClick={() => {
                   remote.current?.pasteText(transfer.text);
                   setTransfer(null);
                 }}
-              >
-                粘贴到 Cage
-              </button>
+              >{uiText("粘贴到 Cage")}</button>
             </>
           }
         >
           <div className="modal-body">
-            <p>{transfer.message}</p>
+            <p>{uiText(transfer.message)}</p>
             <textarea
-              aria-label="待传递文本"
+              aria-label={uiText("待传递文本")}
               className="transfer-text"
               value={transfer.text}
               onChange={(e) =>
@@ -1931,13 +1917,13 @@ function App() {
         </Modal>
       )}
       {details && (
-        <Modal title="操作详情" wide onClose={() => setDetails(false)}>
+        <Modal title={uiText("操作详情")} wide onClose={() => setDetails(false)}>
           <div className="modal-body">
             <p><SafetyMessage message={status.job.message} /></p>
             {status.job.error && (
               <div className="error-message"><SafetyMessage message={status.job.error} /></div>
             )}
-            <pre className="job-log">{status.job.log || "暂无日志"}</pre>
+            <pre className="job-log">{status.job.log || uiText("暂无日志")}</pre>
           </div>
         </Modal>
       )}

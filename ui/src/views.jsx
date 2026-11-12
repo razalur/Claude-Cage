@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import { isMac, terminalModifier } from "./platform.mjs";
 import React, {
   useEffect,
@@ -260,25 +261,21 @@ export const RemoteView = forwardRef(function RemoteView(
     <div className={`remote-view ${visible ? "" : "concealed"}`}>
       <div className="remote-canvas" ref={box} />
       {sizeError && connection === "connected" && (
-        <div className="remote-size-warning connection-banner" role="alert">
-          画面尺寸未能同步，显示比例可能不准确。
-          <button onClick={() => displayResize.current?.retry()}>重试调整</button>
+        <div className="remote-size-warning connection-banner" role="alert">{uiText("画面尺寸未能同步，显示比例可能不准确。")}<button onClick={() => displayResize.current?.retry()}>{uiText("重试调整")}</button>
         </div>
       )}
       {connection !== "connected" && (
         <div className="view-overlay">
           <RefreshCw className={connection === "connecting" ? "spin" : ""} />
           <h3>
-            {connection === "connecting" ? "正在连接画面" : "画面连接已断开"}
+            {connection === "connecting" ? uiText("正在连接画面") : uiText("画面连接已断开")}
           </h3>
-          <p>后台任务不会因画面断开而自动结束。</p>
+          <p>{uiText("后台任务不会因画面断开而自动结束。")}</p>
           {connection === "disconnected" && (
             <button
               className="primary"
               onClick={() => setAttempt((v) => v + 1)}
-            >
-              重新连接画面
-            </button>
+            >{uiText("重新连接画面")}</button>
           )}
         </div>
       )}
@@ -478,7 +475,7 @@ export function TerminalView({ session, visible, focused = true, onStatus, onCon
           void enqueue(() => send("\x1b[99;6u")).catch(() => {});
         onStatus(terminal.modes.mouseTrackingMode === "none"
           ? "请先拖选要复制的终端文字"
-          : `当前程序接管了鼠标。请按住 ${isMac ? "Option" : "Shift"} 拖选文字，再复制。`);
+          : uiFormat("当前程序接管了鼠标。请按住 {0} 拖选文字，再复制。", isMac ? "Option" : "Shift"));
         return;
       }
       void writeClipboard(text)
@@ -605,20 +602,18 @@ export function TerminalView({ session, visible, focused = true, onStatus, onCon
       <div className={`terminal-host ${preparing ? "terminal-preparing" : ""}`} ref={box} aria-hidden={preparing || undefined} />
       {preparing && (
         <div className="terminal-startup" role="status">
-          <span>正在准备 Claude 会话…</span>
-          <button onClick={() => revealStartup.current?.()}>显示启动过程</button>
+          <span>{uiText("正在准备 Claude 会话…")}</span>
+          <button onClick={() => revealStartup.current?.()}>{uiText("显示启动过程")}</button>
         </div>
       )}
       {!connected && (
         <div className="terminal-note">
           {session.closed
-            ? "终端会话已结束。可点击项目右侧的终端图标新建终端。"
-            : "正在连接终端…"}
+            ? uiText("终端会话已结束。可点击项目右侧的终端图标新建终端。")
+            : uiText("正在连接终端…")}
           {!session.closed && (
             <button onClick={() => setAttempt((v) => v + 1)}>
-              <RefreshCw size={13} />
-              重新连接
-            </button>
+              <RefreshCw size={13} />{uiText("重新连接")}</button>
           )}
         </div>
       )}

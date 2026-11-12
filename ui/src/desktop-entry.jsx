@@ -1,3 +1,4 @@
+import { uiLanguage, uiText } from "./ui-language.mjs";
 import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { installDiagnostics } from "./diagnostics.mjs";
@@ -8,6 +9,7 @@ import "./style.css";
 
 const Workbench = lazy(() => import("./main.jsx"));
 
+document.documentElement.lang = uiLanguage;
 installDiagnostics();
 // Keep the native menu usable while the workbench is loading or disconnected.
 window.cageNativeAction = (command) => {
@@ -20,7 +22,7 @@ createRoot(document.getElementById("root")).render(
       <Suspense
         fallback={
           <div className="client-loading" role="status">
-            正在打开工作台…
+            {uiText("正在打开工作台…")}
           </div>
         }
       >

@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import React, { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
 import { api } from "./api";
@@ -14,7 +15,7 @@ export function NetworkLatency({ enabled, revision, selected }) {
         const proxy = await api("/proxy");
         if (cancelled) return;
         if (!proxy.active || !proxy.running || !proxy.selected) {
-          setSample({ label: "延迟 —", detail: "当前代理未连接" });
+          setSample({ label: uiText("延迟 —"), detail: "当前代理未连接" });
         } else {
           const result = await api("/proxy/delay", { node_id: proxy.selected });
           if (cancelled) return;
@@ -35,7 +36,7 @@ export function NetworkLatency({ enabled, revision, selected }) {
             });
           } else {
             setSample({
-              label: "延迟不可用",
+              label: uiText("延迟不可用"),
               detail: "当前节点测速未成功，点击重试",
             });
           }
@@ -43,7 +44,7 @@ export function NetworkLatency({ enabled, revision, selected }) {
       } catch {
         if (!cancelled)
           setSample({
-            label: "延迟不可用",
+            label: uiText("延迟不可用"),
             detail: "无法测量当前节点延迟，点击重试",
           });
       } finally {
@@ -59,11 +60,11 @@ export function NetworkLatency({ enabled, revision, selected }) {
   return (
     <button
       className="status-latency"
-      aria-label={`网络延迟：${enabled ? sample?.label || "检测中" : "未连接"}`}
+      aria-label={uiFormat("网络延迟：{0}", uiText(enabled ? sample?.label || "检测中" : "未连接"))}
       title={
         enabled
-          ? sample?.detail || "正在检测当前节点的网络延迟"
-          : "环境启动并连接代理后检测网络延迟"
+          ? uiText(sample?.detail) || uiText("正在检测当前节点的网络延迟")
+          : uiText("环境启动并连接代理后检测网络延迟")
       }
       disabled={!enabled}
       onClick={() => {
@@ -72,7 +73,7 @@ export function NetworkLatency({ enabled, revision, selected }) {
       }}
     >
       <Activity size={12} />
-      <span>{enabled ? sample?.label || "测延迟…" : "延迟 —"}</span>
+      <span>{enabled ? uiText(sample?.label || "测延迟…") : uiText("延迟 —")}</span>
     </button>
   );
 }

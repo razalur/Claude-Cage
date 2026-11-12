@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Pencil, Plus, RefreshCw, TerminalSquare, Timer } from "lucide-react";
 import { api } from "./api";
@@ -54,10 +55,10 @@ const usageUpdatedAt = (profile) => Math.max(profile.quota?.five_hour?.observed_
 const ageUnit = (elapsed) => elapsed < 3600 ? 60 : elapsed < 86400 ? 3600 : 86400;
 function relativeTimeLabel(seconds, now) {
   const elapsed = Math.max(0, now - seconds);
-  if (elapsed < 60) return "刚刚";
-  if (elapsed < 3600) return `${Math.floor(elapsed / 60)}分钟前`;
-  if (elapsed < 86400) return `${Math.floor(elapsed / 3600)}小时前`;
-  return `${Math.floor(elapsed / 86400)}天前`;
+  if (elapsed < 60) return uiText("刚刚");
+  if (elapsed < 3600) return uiFormat("{0}分钟前", Math.floor(elapsed / 60));
+  if (elapsed < 86400) return uiFormat("{0}小时前", Math.floor(elapsed / 3600));
+  return uiFormat("{0}天前", Math.floor(elapsed / 86400));
 }
 
 const QuotaTime = createContext(0);
@@ -99,12 +100,12 @@ function QuotaClock({ accounts, children }) {
 }
 
 function resetCountdown(seconds) {
-  if (seconds < 60) return `${seconds}秒后`;
+  if (seconds < 60) return uiFormat("{0}秒后", seconds);
   const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return `${minutes}分后`;
+  if (minutes < 60) return uiFormat("{0}分后", minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}时 ${minutes % 60}分后`;
-  return `${Math.floor(hours / 24)}天 ${hours % 24}时后`;
+  if (hours < 24) return uiFormat("{0}时 {1}分后", hours, minutes % 60);
+  return uiFormat("{0}天 {1}时后", Math.floor(hours / 24), hours % 24);
 }
 
 const usageLabels = {
@@ -151,21 +152,21 @@ function QuotaWindow({ label, snapshot, state }) {
     !["reported", "partial"].includes(state));
   const countdown = expired ? "等待更新" : remaining !== null ? resetCountdown(remaining) :
     known ? "重置时间未知" : state === "checking" ? "查询中" : "暂无读数";
-  return <div className="claude-quota-row" role="group" aria-label={label + " 额度"}>
+  return <div className="claude-quota-row" role="group" aria-label={uiFormat("{0} 额度", label)}>
     <span className="claude-quota-period">{label}</span>
     {known
-      ? <progress aria-label={label + " 已用额度"} value={snapshot.used_percentage} max={100} />
+      ? <progress aria-label={uiFormat("{0} 已用额度", label)} value={snapshot.used_percentage} max={100} />
       : <span className="claude-quota-unknown" aria-hidden="true" />}
     <div className="claude-quota-reading">
-      {stale && <span className="claude-quota-stale" title={lastSeen ? `历史读数 · ${timeLabel(lastSeen)}` : "历史读数"}>历史读数</span>}
-      {known && <strong title={lastSeen ? `已用额度 · 读取于 ${timeLabel(lastSeen)}` : "已用额度"}>{snapshot.used_percentage}%</strong>}
-      <span className="claude-quota-reset" title={reset ? `${timeLabel(reset)} 重置` : "尚无重置时间"}>
-        {remaining > 0 && <Timer size={12} aria-hidden="true" />}{countdown}
+      {stale && <span className="claude-quota-stale" title={lastSeen ? uiFormat("历史读数 · {0}", timeLabel(lastSeen)) : uiText("历史读数")}>{uiText("历史读数")}</span>}
+      {known && <strong title={lastSeen ? uiFormat("已用额度 · 读取于 {0}", timeLabel(lastSeen)) : uiText("已用额度")}>{snapshot.used_percentage}%</strong>}
+      <span className="claude-quota-reset" title={reset ? uiFormat("{0} 重置", timeLabel(reset)) : uiText("尚无重置时间")}>
+        {remaining > 0 && <Timer size={12} aria-hidden="true" />}{uiText(countdown)}
       </span>
     </div>
     {hasReading && (expired || stale || state === "partial") && <small className="claude-quota-history">
-      {expired && `上次 ${snapshot.used_percentage}% · `}
-      {lastSeen > 0 ? <>{!expired && "读取于 "}<time dateTime={new Date(lastSeen * 1000).toISOString()}>{timeLabel(lastSeen)}</time></> : "读数时间未知"}
+      {expired && uiFormat("上次 {0}% · ", snapshot.used_percentage)}
+      {lastSeen > 0 ? <>{!expired && uiText("读取于 ")}<time dateTime={new Date(lastSeen * 1000).toISOString()}>{timeLabel(lastSeen)}</time></> : uiText("读数时间未知")}
     </small>}
   </div>;
 }
@@ -181,8 +182,8 @@ function UsageNote({ profile, state }) {
   const now = useContext(QuotaTime);
   const updated = usageUpdatedAt(profile);
   return <small className="claude-quota-age">
-    <span>{usageLabels[state] || "暂无额度信息"}</span>
-    {updated > 0 && <span>最近更新 <time dateTime={new Date(updated * 1000).toISOString()} title={timeLabel(updated)}>
+    <span>{uiText(usageLabels[state] || "暂无额度信息")}</span>
+    {updated > 0 && <span>{uiText("最近更新")} <time dateTime={new Date(updated * 1000).toISOString()} title={timeLabel(updated)}>
       {relativeTimeLabel(updated, now)}</time></span>}
   </small>;
 }
@@ -198,16 +199,16 @@ function DetectedProfile({ profile, usageEnvironment, busy, join, perform, chang
           {profile.plan && <span className="claude-profile-plan">{profile.plan}</span>}
         </div>
         <div className="claude-profile-meta">
-          <span className="claude-profile-status">普通终端 · 已发现，未加入</span>
+          <span className="claude-profile-status">{uiText("普通终端 · 已发现，未加入")}</span>
           {profile.organization && <span className="claude-profile-email" title={profile.organization}>{profile.organization}</span>}
         </div>
       </div>
     </div>
     <ProfileUsage quota={profile.quota} state={usage.state} />
     <div className="claude-profile-actions">
-      <button className="quiet-button" disabled={busy} onClick={join}><Plus size={14} />加入调度</button>
+      <button className="quiet-button" disabled={busy} onClick={join}><Plus size={14} />{uiText("加入调度")}</button>
       <button className="quiet-button" disabled={busy || !!usageEnvironment || usage.state === "checking"} onClick={usage.check}>
-        <RefreshCw size={14} />检查状态</button>
+        <RefreshCw size={14} />{uiText("检查状态")}</button>
       <UsageNote profile={profile} state={usage.state} />
     </div>
   </article>;
@@ -229,52 +230,50 @@ function ProfileCard({ profile, environment, usageEnvironment, busy, active, def
           e.preventDefault();
           perform(async () => { await change({ action: "update", id: profile.id, label: savedLabel }); setRenaming(false); });
         }}>
-          <input autoFocus aria-label="账号备注" maxLength={64} placeholder={profile.email || "账号名称"} value={label} onChange={(e) => setLabel(e.target.value)} />
-          <button disabled={busy || !savedLabel} aria-label="保存备注"><Check size={15} /></button>
-          <button type="button" disabled={busy} onClick={() => setRenaming(false)}>取消</button>
+          <input autoFocus aria-label={uiText("账号备注")} maxLength={64} placeholder={profile.email || uiText("账号名称")} value={label} onChange={(e) => setLabel(e.target.value)} />
+          <button disabled={busy || !savedLabel} aria-label={uiText("保存备注")}><Check size={15} /></button>
+          <button type="button" disabled={busy} onClick={() => setRenaming(false)}>{uiText("取消")}</button>
         </form> : <div className="claude-profile-name">
           <h4 title={displayName}>{displayName}</h4>
           {profile.plan && <span className="claude-profile-plan">{profile.plan}</span>}
-          <button type="button" className="icon-button" disabled={busy} aria-label={`修改 ${displayName} 的备注`}
+          <button type="button" className="icon-button" disabled={busy} aria-label={uiFormat("修改 {0} 的备注", displayName)}
             onClick={() => { setLabel(profile.label === profile.email ? "" : profile.label || ""); setRenaming(true); }}><Pencil size={14} /></button>
         </div>}
         <div className="claude-profile-meta">
-          <span className="claude-profile-status" data-ready={profile.status === "ready"}>{statusLabels[profile.status] || "状态未知"}</span>
+          <span className="claude-profile-status" data-ready={profile.status === "ready"}>{uiText(statusLabels[profile.status] || "状态未知")}</span>
           {profile.email && <span className="claude-profile-email" title={[profile.email, profile.organization].filter(Boolean).join(" · ")}>
             {[profile.email !== displayName && profile.email, profile.organization].filter(Boolean).join(" · ")}
           </span>}
         </div>
       </div>
       <label className="check-line claude-participation">
-        <input type="checkbox" aria-label="参与自动分配" checked={profile.enabled} disabled={busy}
+        <input type="checkbox" aria-label={uiText("参与自动分配")} checked={profile.enabled} disabled={busy}
           onChange={(e) => { const enabled = e.target.checked; perform(() => change({ action: "update", id: profile.id, enabled })); }} />
         <span className="claude-switch-track" aria-hidden="true" />
-        <span>{profile.enabled ? "参与分配" : "已暂停"}</span>
+        <span>{profile.enabled ? uiText("参与分配") : uiText("已暂停")}</span>
       </label>
     </div>
     <ProfileUsage quota={profile.quota} state={usage.state} />
     <form className="claude-handoff-group" onSubmit={event => { event.preventDefault(); perform(() => change({action:"update",id:profile.id,handoff_group:group})); }}>
-      <label>接续分组<input aria-label={`${displayName} 的接续分组`} value={group} maxLength={32} placeholder="未分组，不跨账号接续" onChange={event => setGroup(event.target.value)} /></label>
-      <button disabled={busy || group === (profile.handoff_group || "")}>保存分组</button>
+      <label>{uiText("接续分组")}<input aria-label={uiFormat("{0} 的接续分组", displayName)} value={group} maxLength={32} placeholder={uiText("未分组，不跨账号接续")} onChange={event => setGroup(event.target.value)} /></label>
+      <button disabled={busy || group === (profile.handoff_group || "")}>{uiText("保存分组")}</button>
     </form>
-    {active > 0 && <p className="claude-profile-note">{active} 个终端仍在运行{!fromTerminal && "，关闭后可重新登录"}</p>}
-    {!fromTerminal && defaultActive > 0 && <p className="field-help">
-      其中 {defaultActive} 个工作终端仍使用普通终端的登录。若普通终端已换号，请重新打开这些会话确认身份。
-    </p>}
+    {active > 0 && <p className="claude-profile-note">{active} {uiText("个终端仍在运行")}{!fromTerminal && uiText("，关闭后可重新登录")}</p>}
+    {!fromTerminal && defaultActive > 0 && <p className="field-help">{uiText("其中")} {defaultActive} {uiText("个工作终端仍使用普通终端的登录。若普通终端已换号，请重新打开这些会话确认身份。")}</p>}
     {fromTerminal && ["changed", "signed_out"].includes(profile.status) && <p className="field-help">
-      {profile.status === "changed" ? "普通终端已换号，此账号暂不参与分配。新身份需单独加入。" : "普通终端已退出。要继续使用此账号，请先重新登录原身份。"}
-      {active > 0 && " 原工作终端仍保留首次分配的标签。请重新打开工作会话确认身份。"}
+      {profile.status === "changed" ? uiText("普通终端已换号，此账号暂不参与分配。新身份需单独加入。") : uiText("普通终端已退出。要继续使用此账号，请先重新登录原身份。")}
+      {active > 0 && uiText(" 原工作终端仍保留首次分配的标签。请重新打开工作会话确认身份。")}
     </p>}
-    {!fromTerminal && profile.status === "changed" && <p className="field-help">请用原账号重新登录。若要使用新的身份，请点击「登录新账号」。</p>}
-    {profile.status === "duplicate" && <p className="field-help">同一订阅只参与一次分配。请在此位置登录另一个账号。</p>}
+    {!fromTerminal && profile.status === "changed" && <p className="field-help">{uiText("请用原账号重新登录。若要使用新的身份，请点击「登录新账号」。")}</p>}
+    {profile.status === "duplicate" && <p className="field-help">{uiText("同一订阅只参与一次分配。请在此位置登录另一个账号。")}</p>}
     <div className="claude-profile-actions">
-      {fromTerminal ? <span className="claude-profile-source">普通终端账号</span> :
+      {fromTerminal ? <span className="claude-profile-source">{uiText("普通终端账号")}</span> :
         <button className="quiet-button" disabled={busy || !!environment || active > 0} onClick={() => perform(() => login(profile.id))}>
-          <TerminalSquare size={14} />{profile.status === "ready" ? "重新登录" : "打开登录终端"}</button>}
+          <TerminalSquare size={14} />{profile.status === "ready" ? uiText("重新登录") : uiText("打开登录终端")}</button>}
       <button className="quiet-button" disabled={busy || !!usageEnvironment || usage.state === "checking"} onClick={usage.check}>
-        <RefreshCw size={14} />检查状态</button>
+        <RefreshCw size={14} />{uiText("检查状态")}</button>
       {!fromTerminal && !profile.email && !active && ["pending", "signed_out", "duplicate"].includes(profile.status) &&
-        <button className="text-button" disabled={busy} onClick={() => perform(() => cancelDraft(profile))}>撤销添加</button>}
+        <button className="text-button" disabled={busy} onClick={() => perform(() => cancelDraft(profile))}>{uiText("撤销添加")}</button>}
       <UsageNote profile={profile} state={usage.state} />
     </div>
   </article>;
@@ -331,11 +330,11 @@ export function ClaudeAccountsPanel({ store, running, environmentBusy, tabs, log
   };
   const cancelDraft = async (profile) => {
     const last = accounts.length === 1;
-    if (await onConfirm({ title: `撤销添加「${profile.label}」？`,
+    if (await onConfirm({ title: uiFormat("撤销添加「{0}」？", profile.label),
       body: last
-        ? "这是列表中的最后一个账号。撤销后，新建 Claude 终端会沿用环境原有的登录。虚拟机中的资料会保留。"
-        : "此账号会从列表中移除，虚拟机中的资料会保留。",
-      confirm: "撤销添加" })) {
+        ? uiText("这是列表中的最后一个账号。撤销后，新建 Claude 终端会沿用环境原有的登录。虚拟机中的资料会保留。")
+        : uiText("此账号会从列表中移除，虚拟机中的资料会保留。"),
+      confirm: uiText("撤销添加") })) {
       await load({ action: "cancel", id: profile.id });
     }
   };
@@ -346,50 +345,50 @@ export function ClaudeAccountsPanel({ store, running, environmentBusy, tabs, log
       throw e;
     }
   };
-  return <section className="claude-profiles" aria-label="Claude 账号管理">
+  return <section className="claude-profiles" aria-label={uiText("Claude 账号管理")}>
     <div className="section-title">
-      <h3>Claude 账号</h3>
-      <p>将普通终端已登录的订阅加入调度，或单独登录一个新账号。新建 Claude 终端时自动分配。</p>
+      <h3>{uiText("Claude 账号")}</h3>
+      <p>{uiText("将普通终端已登录的订阅加入调度，或单独登录一个新账号。新建 Claude 终端时自动分配。")}</p>
     </div>
     <details className="claude-scheduling">
-      <summary>调度设置 · {store.scheduling.mode === "sequential" ? "顺序优先" : "均衡分配"}</summary>
-      <label>新会话分配<InlineSelect aria-label="新会话分配" value={store.scheduling.mode} disabled={busy}
+      <summary>{uiText("调度设置 ·")} {store.scheduling.mode === "sequential" ? uiText("顺序优先") : uiText("均衡分配")}</summary>
+      <label>{uiText("新会话分配")}<InlineSelect aria-label={uiText("新会话分配")} value={store.scheduling.mode} disabled={busy}
         onValueChange={mode => perform(() => load({action:"scheduling",scheduling:{...store.scheduling,mode}}))}>
-        <option value="balanced">均衡分配</option><option value="sequential">按列表顺序优先</option>
+        <option value="balanced">{uiText("均衡分配")}</option><option value="sequential">{uiText("按列表顺序优先")}</option>
       </InlineSelect></label>
-      <label>新会话切换授权<InlineSelect aria-label="新会话切换授权" value={store.scheduling.switch_policy} disabled={busy}
+      <label>{uiText("新会话切换授权")}<InlineSelect aria-label={uiText("新会话切换授权")} value={store.scheduling.switch_policy} disabled={busy}
         onValueChange={switch_policy => perform(() => load({action:"scheduling",scheduling:{...store.scheduling,switch_policy}}))}>
-        <option value="ask">每次询问</option><option value="allow">额度耗尽后自动接续</option><option value="wait">始终等待原账号</option>
+        <option value="ask">{uiText("每次询问")}</option><option value="allow">{uiText("额度耗尽后自动接续")}</option><option value="wait">{uiText("始终等待原账号")}</option>
       </InlineSelect></label>
-      <p className="field-help">已有会话保持原账号和授权。自动接续只在限额已确认、原任务可安全停止且目标账号属于同一接续分组时进行；跨账号可能重建缓存。</p>
-      {store.scheduling.mode === "sequential" && accounts?.length > 1 && <div className="claude-account-order" aria-label="账号优先顺序">
+      <p className="field-help">{uiText("已有会话保持原账号和授权。自动接续只在限额已确认、原任务可安全停止且目标账号属于同一接续分组时进行；跨账号可能重建缓存。")}</p>
+      {store.scheduling.mode === "sequential" && accounts?.length > 1 && <div className="claude-account-order" aria-label={uiText("账号优先顺序")}>
         {accounts.map((profile,index) => <div key={profile.id}><span>{index+1}. {profile.label || profile.email}</span>
-          <button disabled={busy || index===0} aria-label={`提高 ${profile.label} 的优先级`} onClick={() => {
+          <button disabled={busy || index===0} aria-label={uiFormat("提高 {0} 的优先级", profile.label)} onClick={() => {
             const order=accounts.map(a=>a.id); [order[index-1],order[index]]=[order[index],order[index-1]];
             perform(() => load({action:"scheduling",scheduling:store.scheduling,order}));
-          }}>上移</button></div>)}
+          }}>{uiText("上移")}</button></div>)}
       </div>}
     </details>
     <div className="claude-add-profile">
       <button className="primary" disabled={busy || environmentBusy || !!environment}
-        onClick={() => perform(() => login())}><Plus size={16} />登录新账号</button>
+        onClick={() => perform(() => login())}><Plus size={16} />{uiText("登录新账号")}</button>
     </div>
-    {(actionError || error) && <p className="account-error" role="alert">{actionError || error}</p>}
+    {(actionError || error) && <p className="account-error" role="alert">{uiText(actionError) || uiText(error)}</p>}
     {loginNotice && <p className="claude-profile-note" role="status">{loginNotice}</p>}
     {detectionError && <p className="account-error" role="alert">{detectionError}</p>}
     {usageUnavailable && !environment && <p className="claude-profile-note" role="status">{usageUnavailable}</p>}
-    {!running ? <p className="claude-profile-note">启动 Cage 环境后可检测普通终端的登录，也可登录新账号。</p> :
-      detectionStatus === "offline" ? <p className="claude-profile-note">工作环境就绪后可检测和登录账号。</p> :
-      detectionStatus === "signed_out" && <p className="claude-profile-note">普通终端尚未登录 Claude 订阅。可在其中运行 <code>claude auth login</code>，登录后会在这里出现。</p>}
+    {!running ? <p className="claude-profile-note">{uiText("启动 Cage 环境后可检测普通终端的登录，也可登录新账号。")}</p> :
+      detectionStatus === "offline" ? <p className="claude-profile-note">{uiText("工作环境就绪后可检测和登录账号。")}</p> :
+      detectionStatus === "signed_out" && <p className="claude-profile-note">{uiText("普通终端尚未登录 Claude 订阅。可在其中运行")} <code>claude auth login</code>{uiText("，登录后会在这里出现。")}</p>}
     <div className="claude-list-heading">
-      <h4>账号列表 <span>{visibleProfiles?.length ?? "—"}</span></h4>
-      {requestingUsage || checking ? <small role="status">{requestingUsage ? "正在请求账号用量…" : "正在查询账号用量…"}</small> :
-        accounts?.length > 0 && <small>{accounts.filter((a) => a.enabled).length} 个启用调度</small>}
+      <h4>{uiText("账号列表")} <span>{visibleProfiles?.length ?? "—"}</span></h4>
+      {requestingUsage || checking ? <small role="status">{requestingUsage ? uiText("正在请求账号用量…") : uiText("正在查询账号用量…")}</small> :
+        accounts?.length > 0 && <small>{accounts.filter((a) => a.enabled).length} {uiText("个启用调度")}</small>}
     </div>
-    <div className="claude-profile-list" role="region" aria-label="账号列表" tabIndex={0}>
-      {accounts === null && !error && <p role="status">正在读取账号…</p>}
+    <div className="claude-profile-list" role="region" aria-label={uiText("账号列表")} tabIndex={0}>
+      {accounts === null && !error && <p role="status">{uiText("正在读取账号…")}</p>}
       {accounts?.length === 0 && !detected && <div className="claude-profile-empty">
-        <img src={crabIcon} alt="" /><p>尚无已加入调度的账号。</p><small>加入第一个账号前，新终端沿用环境原有的登录。</small>
+        <img src={crabIcon} alt="" /><p>{uiText("尚无已加入调度的账号。")}</p><small>{uiText("加入第一个账号前，新终端沿用环境原有的登录。")}</small>
       </div>}
       <QuotaClock accounts={visibleProfiles}>
         {detected && <DetectedProfile key={detected.identity} profile={detected} usageEnvironment={usageEnvironment} busy={busy || environmentBusy || !!environment}

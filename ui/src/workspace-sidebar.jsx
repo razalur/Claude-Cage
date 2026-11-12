@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import { shortcut } from "./platform.mjs";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -86,7 +87,7 @@ export function WorkspaceSidebar({
   if (ssh?.expanded) return null;
   const healthy = ready && network.mode === "open";
   return (
-    <aside className="workspace-sidebar" aria-label="项目与终端">
+    <aside className="workspace-sidebar" aria-label={uiText("项目与终端")}>
       <div className="sidebar-top">
         <span className="sidebar-brand">
           <img className="brand-logo" src={logo} alt="" />
@@ -96,46 +97,46 @@ export function WorkspaceSidebar({
         <button
           className="icon-button"
           onClick={onCollapse}
-          aria-label="收起侧栏"
-          title="收起侧栏"
+          aria-label={uiText("收起侧栏")}
+          title={uiText("收起侧栏")}
         >
           <PanelLeftClose size={17} />
         </button>
       </div>
-      <nav className="sidebar-navigation" aria-label="主导航">
+      <nav className="sidebar-navigation" aria-label={uiText("主导航")}>
         <button
           className={`sidebar-link ${home ? "selected" : ""}`}
           onClick={onHome}
         >
           <Home size={17} />
-          工作台
+          {uiText("工作台")}
         </button>
         <button
           className={`sidebar-link ${!desktopOpen && !home && tabs.some((tab) => tab.id === active && tab.kind !== "terminal") ? "selected" : ""}`}
           onClick={onBrowser}
           disabled={!ready || busy}
-          aria-label="打开浏览器"
-          title="打开浏览器"
+          aria-label={uiText("打开浏览器")}
+          title={uiText("打开浏览器")}
         >
           <Globe2 size={17} />
-          浏览器
+          {uiText("浏览器")}
         </button>
-        <button className="sidebar-link" onClick={onTailscale} aria-label="打开 Tailscale"><Network size={17} />Tailscale</button>
-        {ssh && <button className="sidebar-link ssh-navigation" onClick={ssh.open} aria-label="SSH 主机"><Server size={17} />SSH</button>}
+        <button className="sidebar-link" onClick={onTailscale} aria-label={uiText("打开 Tailscale")}><Network size={17} />Tailscale</button>
+        {ssh && <button className="sidebar-link ssh-navigation" onClick={ssh.open} aria-label={uiText("SSH 主机")}><Server size={17} />SSH</button>}
         <div className="claude-shortcuts">
-          <button className="sidebar-link" onClick={onClaudeWeb} disabled={!ready || busy} title="在 Cage 浏览器打开 claude.ai"><MessageCircle size={17} />claude.ai</button>
-          <button className={`sidebar-link ${desktopOpen ? "selected" : ""}`} onClick={onClaudeDesktop} disabled={!running || busy} title="安装或打开 Claude Desktop"><Monitor size={17} />Claude Desktop</button>
+          <button className="sidebar-link" onClick={onClaudeWeb} disabled={!ready || busy} title={uiText("在 Cage 浏览器打开 claude.ai")}><MessageCircle size={17} />claude.ai</button>
+          <button className={`sidebar-link ${desktopOpen ? "selected" : ""}`} onClick={onClaudeDesktop} disabled={!running || busy} title={uiText("安装或打开 Claude Desktop")}><Monitor size={17} />Claude Desktop</button>
         </div>
         {downloadAction}
       </nav>
       <div className="sidebar-scroll">
         <div className="sidebar-section-heading">
-          <span>项目</span>
+          <span>{uiText("项目")}</span>
           <button
             className="icon-button"
             onClick={() => onOpenProject()}
-            aria-label="添加项目"
-            title="添加项目"
+            aria-label={uiText("添加项目")}
+            title={uiText("添加项目")}
             disabled={busy}
           >
             <Plus size={15} />
@@ -146,7 +147,7 @@ export function WorkspaceSidebar({
             <div role="alert">
               <div className="sidebar-session-error-heading">
                 <CircleAlert size={16} aria-hidden="true" />
-                <strong>会话列表暂未更新</strong>
+                <strong>{uiText("会话列表暂未更新")}</strong>
               </div>
               <p>{sessionError}</p>
             </div>
@@ -156,7 +157,7 @@ export function WorkspaceSidebar({
               aria-busy={sessionRefreshing || undefined}
             >
               <RefreshCw size={14} aria-hidden="true" />
-              {sessionRefreshing ? "正在读取…" : "重新读取会话"}
+              {sessionRefreshing ? uiText("正在读取…") : uiText("重新读取会话")}
             </button>
           </div>
         )}
@@ -171,7 +172,7 @@ export function WorkspaceSidebar({
             <section
               className="sidebar-project"
               key={path}
-              aria-label={`项目 ${project}`}
+              aria-label={uiFormat("项目 {0}", project)}
             >
               <div
                 className={`project-heading ${workspace === path ? "current-project" : ""}`}
@@ -193,8 +194,8 @@ export function WorkspaceSidebar({
                 </button>
                 <button
                   className="icon-button"
-                  aria-label={`打开 ${project} 的编辑器`}
-                  title="在 code-server 中打开项目目录"
+                  aria-label={uiFormat("打开 {0} 的编辑器", project)}
+                  title={uiText("在 code-server 中打开项目目录")}
                   disabled={!ready || busy}
                   onClick={() => onEditor(path)}
                 >
@@ -202,8 +203,8 @@ export function WorkspaceSidebar({
                 </button>
                 <button
                   className="icon-button"
-                  aria-label={`在 ${project} 新建终端`}
-                  title="新建终端"
+                  aria-label={uiFormat("在 {0} 新建终端", project)}
+                  title={uiText("新建终端")}
                   aria-haspopup="menu"
                   data-terminal-location={path}
                   disabled={!running || busy}
@@ -231,7 +232,7 @@ export function WorkspaceSidebar({
                       openingSession={openingSession}
                       sessionOpenError={sessionOpenError}
                       active={home || desktopOpen ? "" : active}
-                      label={`${project} 的终端`}
+                      label={uiFormat("{0} 的终端", project)}
                       busy={busy}
                       ready={ready}
                       onSelect={(id, ...args) => {
@@ -256,7 +257,7 @@ export function WorkspaceSidebar({
                     />
                   )}
                   {!rows.length && !running && (
-                    <p className="sidebar-empty">启动后可新建终端</p>
+                    <p className="sidebar-empty">{uiText("启动后可新建终端")}</p>
                   )}
                 </div>
               </div>
@@ -264,18 +265,18 @@ export function WorkspaceSidebar({
           );
         })}
         {!projects.length && (
-          <p className="sidebar-empty">打开本地文件夹开始工作</p>
+          <p className="sidebar-empty">{uiText("打开本地文件夹开始工作")}</p>
         )}
       </div>
       <div className="sidebar-bottom">
         <button className="sidebar-status" onClick={onSafety}>
           <i className={`status-dot ${network.mode}`} />
-          <span>{healthy ? "环境运行正常" : runtimeLabel}</span>
+          <span>{healthy ? uiText("环境运行正常") : runtimeLabel}</span>
           <EnvironmentShield size={17} healthy={healthy} />
         </button>
         <div className="sidebar-footer-actions">
           <AccountMenu onSettings={onSettings} onConfirm={onAccountConfirm} onStatus={onAccountStatus} busy={busy} />
-          <button className="icon-button" aria-label="设置" title={shortcut("设置 ⌘,")} onClick={() => onSettings("keyboard")}><Settings size={17} /></button>
+          <button className="icon-button" aria-label={uiText("设置")} title={shortcut(uiText("设置 ⌘,"))} onClick={() => onSettings("keyboard")}><Settings size={17} /></button>
           {updateAction}
         </div>
       </div>

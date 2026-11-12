@@ -1,3 +1,4 @@
+import { uiLanguage, uiText, uiFormat } from "./ui-language.mjs";
 import { MobilePairSettings } from "./mobile-pair-settings";
 import { ArchivedSessions } from "./cli-sessions";
 import { Smartphone } from "lucide-react";
@@ -110,9 +111,9 @@ export function SettingsPanel({
     if (
       (!changed && !accountDirty && !proxyDirty && !resourceDirty) ||
       (await onConfirm({
-        title: "放弃尚未保存的修改？",
-        body: "当前环境不会改变。关闭后会丢弃这次表单修改。",
-        confirm: "放弃修改",
+        title: uiText("放弃尚未保存的修改？"),
+        body: uiText("当前环境不会改变。关闭后会丢弃这次表单修改。"),
+        confirm: uiText("放弃修改"),
       }))
     )
       onClose();
@@ -157,9 +158,9 @@ export function SettingsPanel({
       environmentChanged &&
       status.vm_running &&
       !(await onConfirm({
-        title: "应用设置并重启环境？",
-        body: "请先保存编辑器中的文件。当前终端会话会结束，浏览器的页面和登录状态将保留。",
-        confirm: "保存并重启",
+        title: uiText("应用设置并重启环境？"),
+        body: uiText("请先保存编辑器中的文件。当前终端会话会结束，浏览器的页面和登录状态将保留。"),
+        confirm: uiText("保存并重启"),
       }))
     )
       return;
@@ -212,7 +213,7 @@ export function SettingsPanel({
     };
   }, []);
   return (
-    <section className="settings-page" aria-label="设置">
+    <section className="settings-page" aria-label={uiText("设置")}>
       <aside className="settings-sidebar">
         <button
           id="settings-back"
@@ -220,23 +221,23 @@ export function SettingsPanel({
           onClick={close}
         >
           <ArrowLeft size={17} />
-          返回工作台
+          {uiText("返回工作台")}
         </button>
-        <h2>设置</h2>
-        <nav aria-label="设置分组">
+        <h2>{uiText("设置")}</h2>
+        <nav aria-label={uiText("设置分组")}>
           {sections.map(([id, label, Icon]) => (
             <button
               key={id}
               className={section === id ? "selected" : ""}
               aria-current={section === id ? "page" : undefined}
               onClick={async () => {
-                if (id !== section && accountDirty && !(await onConfirm({ title: "放弃尚未保存的修改？", body: "已保存的资料和密码保持不变。", confirm: "放弃修改" }))) return;
-                if (id !== section && proxyDirty && !(await onConfirm({ title: "放弃尚未应用的代理修改？", body: "当前代理仍按已应用的链路运行。离开会丢弃这次节点选择。", confirm: "放弃修改" }))) return;
+                if (id !== section && accountDirty && !(await onConfirm({ title: uiText("放弃尚未保存的修改？"), body: uiText("已保存的资料和密码保持不变。"), confirm: uiText("放弃修改") }))) return;
+                if (id !== section && proxyDirty && !(await onConfirm({ title: uiText("放弃尚未应用的代理修改？"), body: uiText("当前代理仍按已应用的链路运行。离开会丢弃这次节点选择。"), confirm: uiText("放弃修改") }))) return;
                 setSection(id);
               }}
             >
               <Icon size={17} />
-              {label}
+              {uiText(label)}
             </button>
           ))}
         </nav>
@@ -249,14 +250,14 @@ export function SettingsPanel({
           {section === "account" && <AccountSettings busy={busy} onDirty={setAccountDirty} />}
           {section === "claude-accounts" && <ClaudeAccountsPanel store={claudeProfiles} tabs={terminalTabs} onConfirm={onConfirm}
             running={status.vm_running} environmentBusy={busy} login={async (id) => {
-              if (changed && !(await onConfirm({ title: "放弃尚未保存的设置并登录？",
-                body: "打开登录终端会离开设置页。", confirm: "打开登录终端" }))) return;
+              if (changed && !(await onConfirm({ title: uiText("放弃尚未保存的设置并登录？"),
+                body: uiText("打开登录终端会离开设置页。"), confirm: uiText("打开登录终端") }))) return;
               await onClaudeLogin(id);
               onClose();
             }} />}
           <fieldset className="settings-fields" disabled={busy && !(section === "project" && status.storage_recovery?.required)}>
             {section === "mobile" && (isRemoteClient()
-              ? <section className="section-title"><h3>连接这台电脑</h3><p>请先切换到这台电脑的本机环境，再生成或管理手机配对码。</p></section>
+              ? <section className="section-title"><h3>{uiText("连接这台电脑")}</h3><p>{uiText("请先切换到这台电脑的本机环境，再生成或管理手机配对码。")}</p></section>
               : <MobilePairSettings relay={draft.mobile_relay ?? ""} savedRelay={current.mobile_relay ?? ""} onChange={value => update("mobile_relay",value)} onConfirm={onConfirm} />)}
             {section === "network" && (
               <>
@@ -274,9 +275,7 @@ export function SettingsPanel({
                     await onSaved();
                   }}
                 />
-                <label>
-                  加密 DNS
-                  <input
+                <label>{uiText("加密 DNS")}<input
                     value={draft.dns_url}
                     onChange={(e) => update("dns_url", e.target.value)}
                     spellCheck="false"
@@ -289,9 +288,9 @@ export function SettingsPanel({
                     ) : (
                       <Globe2 size={15} />
                     )}
-                    验证出口
+                    {uiText("验证出口")}
                   </button>
-                  <span>通过当前节点查询 IP 和位置</span>
+                  <span>{uiText("通过当前节点查询 IP 和位置")}</span>
                 </div>
                 {currentLoc && (
                   <div className={`location-result ${probe ? "fresh" : ""}`}>
@@ -306,19 +305,17 @@ export function SettingsPanel({
                       <small>
                         {currentLoc.timezone} ·{" "}
                         {new Date(currentLoc.checked_at).toLocaleTimeString(
-                          "zh-CN",
+                          uiLanguage,
                           { hour: "2-digit", minute: "2-digit" },
                         )}{" "}
-                        {probe ? "验证通过" : "当前环境 · 最近检测"}
+                        {probe ? uiText("验证通过") : uiText("当前环境 · 最近检测")}
                       </small>
                     </div>
                     {probe && <Check size={18} />}
                   </div>
                 )}
-                <p className="footnote">
-                  代理不可用时，Cage 会停止对外联网。修改表单后需要重新验证。
-                </p>
-                <section className="network-exit-policy" aria-label="IP 变化规则">
+                <p className="footnote">{uiText("代理不可用时，Cage 会停止对外联网。修改表单后需要重新验证。")}</p>
+                <section className="network-exit-policy" aria-label={uiText("IP 变化规则")}>
                   <ExitPolicyFields
                     value={draft.exit_policy}
                     onChange={(value) => update("exit_policy", value)}
@@ -333,20 +330,16 @@ export function SettingsPanel({
             {section === "region" && (
               <>
                 <div className="section-title">
-                  <h3>时区与语言</h3>
-                  <p>这些设置作用于 Cage 内的系统、CLI 和浏览器。</p>
+                  <h3>{uiText("时区与语言")}</h3>
+                  <p>{uiText("这些设置作用于 Cage 内的系统、CLI 和浏览器。")}</p>
                 </div>
                 {!draft.auto_timezone && !draft.auto_language && (
-                  <p className="field-help">
-                    时区和语言将使用下方手动选择的值。所有出口仍须查询国家或地区，确认不属于中国大陆；静态 IP 和不限地区也不能跳过此检查。
-                  </p>
+                  <p className="field-help">{uiText("时区和语言将使用下方手动选择的值。所有出口仍须查询国家或地区，确认不属于中国大陆；静态 IP 和不限地区也不能跳过此检查。")}</p>
                 )}
                 <label className="toggle-row">
                   <span>
-                    <strong>跟随出口 IP 的时区</strong>
-                    <small>
-                      在启动或应用设置时重新查询，不会静默重启正在运行的任务。
-                    </small>
+                    <strong>{uiText("跟随出口 IP 的时区")}</strong>
+                    <small>{uiText("在启动或应用设置时重新查询，不会静默重启正在运行的任务。")}</small>
                   </span>
                   <input
                     role="switch"
@@ -356,9 +349,9 @@ export function SettingsPanel({
                   />
                 </label>
                 <label>
-                  {draft.auto_timezone ? "将应用的时区" : "系统时区"}
+                  {draft.auto_timezone ? uiText("将应用的时区") : uiText("系统时区")}
                   <InlineSelect editable
-                    aria-label={draft.auto_timezone ? "将应用的时区" : "系统时区"}
+                    aria-label={draft.auto_timezone ? uiText("将应用的时区") : uiText("系统时区")}
                     value={draft.timezone}
                     disabled={draft.auto_timezone}
                     onValueChange={(next) => update("timezone", next)}
@@ -373,24 +366,20 @@ export function SettingsPanel({
                     <Clock3 size={16} />
                     <span>
                       {probe
-                        ? `出口建议时区：${probe.timezone}，保存时应用。`
-                        : "保存时经代理查询所在地；查询失败会保留原配置。"}
+                        ? uiFormat("出口建议时区：{0}，保存时应用。", probe.timezone)
+                        : uiText("保存时经代理查询所在地；查询失败会保留原配置。")}
                     </span>
                     <button
                       className="text-button"
                       onClick={check}
                       disabled={busy}
-                    >
-                      现在检测
-                    </button>
+                    >{uiText("现在检测")}</button>
                   </div>
                 )}
                 <label className="toggle-row">
                   <span>
-                    <strong>跟随出口地区的语言建议</strong>
-                    <small>
-                      启动或应用设置时更新。多语言地区使用内置默认值；没有建议时保留已选语言。
-                    </small>
+                    <strong>{uiText("跟随出口地区的语言建议")}</strong>
+                    <small>{uiText("启动或应用设置时更新。多语言地区使用内置默认值；没有建议时保留已选语言。")}</small>
                   </span>
                   <input
                     role="switch"
@@ -404,22 +393,20 @@ export function SettingsPanel({
                     <Globe2 size={16} />
                     <span>
                       {currentLoc?.suggested_locale
-                        ? `地区建议：${currentLoc.suggested_locale} / ${currentLoc.suggested_browser_language}`
-                        : "检测出口后获取地区建议，也可以关闭自动并手动选择。"}
+                        ? uiFormat("地区建议：{0} / {1}", currentLoc.suggested_locale, currentLoc.suggested_browser_language)
+                        : uiText("检测出口后获取地区建议，也可以关闭自动并手动选择。")}
                     </span>
                     <button
                       className="text-button"
                       onClick={check}
                       disabled={busy}
-                    >
-                      现在检测
-                    </button>
+                    >{uiText("现在检测")}</button>
                   </div>
                 )}
                 <label>
-                  系统语言
+                  {uiText("系统语言")}
                   <InlineSelect
-                    aria-label="系统语言"
+                    aria-label={uiText("系统语言")}
                     value={draft.locale}
                     disabled={draft.auto_language}
                     onValueChange={(next) => update("locale", next)}
@@ -449,9 +436,9 @@ export function SettingsPanel({
                   </InlineSelect>
                 </label>
                 <label>
-                  网页首选语言
+                  {uiText("网页首选语言")}
                   <InlineSelect
-                    aria-label="网页首选语言"
+                    aria-label={uiText("网页首选语言")}
                     value={draft.browser_language}
                     disabled={draft.auto_language}
                     onValueChange={(next) => update("browser_language", next)}
@@ -482,20 +469,16 @@ export function SettingsPanel({
                     )}
                   </InlineSelect>
                 </label>
-                <p className="footnote">
-                  网页仍可按自己的规则选择语言。工作台界面使用中文。
-                </p>
+                <p className="footnote">{uiText("网页仍可按自己的规则选择语言。工作台界面使用中文。")}</p>
               </>
             )}
             {section === "keyboard" && (
               <>
                 <div className="section-title">
-                  <h3>通用</h3>
-                  <p>管理工作台的按键习惯与日常操作。</p>
+                  <h3>{uiText("通用")}</h3>
+                  <p>{uiText("管理工作台的按键习惯与日常操作。")}</p>
                 </div>
-                <label>
-                  Claude 终端启动命令
-                  <input
+                <label>{uiText("Claude 终端启动命令")}<input
                     value={draft.claude_terminal_command ?? "claude"}
                     onChange={(e) => update("claude_terminal_command", e.target.value)}
                     placeholder="claude"
@@ -504,19 +487,16 @@ export function SettingsPanel({
                     autoComplete="off"
                   />
                 </label>
-                <p className="field-help">
-                  选择“Claude 终端”后，在所选项目中运行此命令，例如 claude --continue。
-                  留空使用 claude；保存后仅影响新建的 Claude 终端，退出 Claude 后可继续使用 shell。
-                </p>
+                <p className="field-help">{uiText("选择“Claude 终端”后，在所选项目中运行此命令，例如 claude --continue。 留空使用 claude；保存后仅影响新建的 Claude 终端，退出 Claude 后可继续使用 shell。")}</p>
                 {typeof current.balanced_display === "boolean" && <label className="toggle-row">
                   <span>
-                    <strong>优先流畅</strong>
-                    <small>降低浏览器和 Claude Desktop 的清晰度。下次启动环境时生效。</small>
+                    <strong>{uiText("优先流畅")}</strong>
+                    <small>{uiText("降低浏览器和 Claude Desktop 的清晰度。下次启动环境时生效。")}</small>
                   </span>
                   <input type="checkbox" role="switch" checked={draft.balanced_display}
                     onChange={(event) => update("balanced_display", event.target.checked)} />
                 </label>}
-                <h4>键盘习惯</h4>
+                <h4>{uiText("键盘习惯")}</h4>
                 <div className="choice-list">
                   {[
                     [
@@ -546,17 +526,15 @@ export function SettingsPanel({
                         }}
                       />
                       <span>
-                        <strong>{title}</strong>
-                        <small>{help}</small>
+                        <strong>{uiText(title)}</strong>
+                        <small>{uiText(help)}</small>
                       </span>
                     </label>
                   ))}
                 </div>
-                <p className="field-help">
-                  终端使用 {usesControl ? "Ctrl+Shift+C / Ctrl+Shift+V" : "⌘C / ⌘V"} 复制粘贴；Ctrl+C 始终用于中断命令。
-                  {isRemoteClient() && "键盘习惯立即生效，仅保存在当前客户端，不修改云端设置。"}
+                <p className="field-help">{uiFormat("终端使用 {0} 复制粘贴；Ctrl+C 始终用于中断命令。", usesControl ? "Ctrl+Shift+C / Ctrl+Shift+V" : "⌘C / ⌘V")}{isRemoteClient() && <> {uiText("键盘习惯立即生效，仅保存在当前客户端，不修改云端设置。")}</>}
                 </p>
-                <h4>工作台快捷键</h4>
+                <h4>{uiText("工作台快捷键")}</h4>
                 <div className="shortcut-list">
                   {[
                     ["打开项目", "⌘O"],
@@ -568,7 +546,7 @@ export function SettingsPanel({
                     ["设置", "⌘,"],
                   ].map(([label, key]) => (
                     <div key={label}>
-                      <span>{label}</span>
+                      <span>{uiText(label)}</span>
                       <kbd>{shortcut(key)}</kbd>
                     </div>
                   ))}
@@ -578,47 +556,41 @@ export function SettingsPanel({
             {section === "project" && (
               <>
                 <div className="section-title">
-                  <h3>环境与恢复</h3>
-                  <p>{isRemoteClient() ? "项目位于云端，Cage 中的改动会直接保存到云端文件。" : "本机与 Cage 中的改动会双向同步。"}</p>
+                  <h3>{uiText("环境与恢复")}</h3>
+                  <p>{isRemoteClient() ? uiText("项目位于云端，Cage 中的改动会直接保存到云端文件。") : uiText("本机与 Cage 中的改动会双向同步。")}</p>
                 </div>
                 {status.local_vm_storage && !isRemoteClient() && <EnvironmentStorage status={status} onConfirm={onConfirm} />}
                 <div className="setting-summary-row">
-                  <span>当前项目</span>
+                  <span>{uiText("当前项目")}</span>
                   <strong title={current.workspace}>
                     {status.environment_workspace
-                      ? "Cage 默认工作区"
-                      : current.workspace || "尚未选择项目"}
+                      ? uiText("Cage 默认工作区")
+                      : current.workspace || uiText("尚未选择项目")}
                   </strong>
                 </div>
                 <p className="field-help">
-                  {isRemoteClient() ? "点击侧栏“项目”标题旁的加号，可浏览并选择云端文件夹。" : "点击侧栏“项目”标题旁的加号，可选择其他本地文件夹。"}
+                  {isRemoteClient() ? uiText("点击侧栏“项目”标题旁的加号，可浏览并选择云端文件夹。") : uiText("点击侧栏“项目”标题旁的加号，可选择其他本地文件夹。")}
                 </p>
                 <div className="project-explanation">
                   <FolderOpen size={22} />
                   <div>
-                    <strong>所有项目共用一个 Cage 环境</strong>
-                    <p>
-                      明确打开的项目文件夹会共享到同一个环境。主机的 Claude
-                      登录、SSH 密钥和个人配置不会自动导入。浏览器下载统一保存到
-                      Cage 默认工作区的 Downloads 文件夹。
-                    </p>
+                    <strong>{uiText("所有项目共用一个 Cage 环境")}</strong>
+                    <p>{uiText("明确打开的项目文件夹会共享到同一个环境。主机的 Claude 登录、SSH 密钥和个人配置不会自动导入。浏览器下载统一保存到 Cage 默认工作区的 Downloads 文件夹。")}</p>
                   </div>
                 </div>
-                <p className="footnote">
-                  切换项目只改变新终端和文件编辑器的起始位置；已有终端、网页和登录态会保留。
-                </p>
+                <p className="footnote">{uiText("切换项目只改变新终端和文件编辑器的起始位置；已有终端、网页和登录态会保留。")}</p>
                 {!status.storage_recovery?.required && <EnvironmentVersions status={status} onConfirm={onConfirm} />}
-                {status.guest_system === "macos" && <section aria-label="客机系统权限">
-                  <h4>客机系统权限</h4>
-                  <p className="field-help">在受限的客机系统设置窗口中完成授权，Cage 会自动检查并重新连接项目。</p>
+                {status.guest_system === "macos" && <section aria-label={uiText("客机系统权限")}>
+                  <h4>{uiText("客机系统权限")}</h4>
+                  <p className="field-help">{uiText("在受限的客机系统设置窗口中完成授权，Cage 会自动检查并重新连接项目。")}</p>
                   <div className="project-recovery-actions">
-                    <MacOSLogin maintenance="projects" label="文件共享权限" disabled={!status.ready || busy} />
-                    <MacOSLogin maintenance="screen" label="屏幕录制权限" disabled={!status.ready || busy} />
-                    <MacOSLogin maintenance="input" label="辅助功能权限" disabled={!status.ready || busy} />
+                    <MacOSLogin maintenance="projects" label={uiText("文件共享权限")} disabled={!status.ready || busy} />
+                    <MacOSLogin maintenance="screen" label={uiText("屏幕录制权限")} disabled={!status.ready || busy} />
+                    <MacOSLogin maintenance="input" label={uiText("辅助功能权限")} disabled={!status.ready || busy} />
                   </div>
                 </section>}
                 {!status.storage_recovery?.required && <ResourceSettings status={status} onConfirm={onConfirm} onDirtyChange={setResourceDirty} />}
- <DiagnosticSettings />
+                <DiagnosticSettings />
                 {status.can_restore && (
                   <button
                     className="text-button"
@@ -626,9 +598,9 @@ export function SettingsPanel({
                     onClick={async () => {
                       if (
                         await onConfirm({
-                          title: "恢复上一份配置？",
-                          body: "会停止当前环境并恢复上次应用前的设置。已经结束的终端进程无法恢复。",
-                          confirm: "恢复并重启",
+                          title: uiText("恢复上一份配置？"),
+                          body: uiText("会停止当前环境并恢复上次应用前的设置。已经结束的终端进程无法恢复。"),
+                          confirm: uiText("恢复并重启"),
                         })
                       ) {
                         try {
@@ -640,9 +612,7 @@ export function SettingsPanel({
                       }
                     }}
                   >
-                    <RotateCcw size={14} />
-                    恢复上一份配置
-                  </button>
+                    <RotateCcw size={14} />{uiText("恢复上一份配置")}</button>
                 )}
               </>
             )}
@@ -664,9 +634,7 @@ export function SettingsPanel({
                     setError("");
                     setSection("region");
                   }}
-                >
-                  手动设置时区和语言
-                </button>
+                >{uiText("手动设置时区和语言")}</button>
               )}
             </div>
           )}
@@ -677,16 +645,16 @@ export function SettingsPanel({
             <>
               <span className="save-note">
                 {status.job?.running
-                  ? status.job.message
+                  ? uiText(status.job.message)
                   : proxyDirty
-                    ? "代理修改待应用，请点击「应用代理」"
+                    ? uiText("代理修改待应用，请点击「应用代理」")
                     : changed
                     ? environmentChanged && status.vm_running
-                      ? "网络和系统设置需要重启"
-                      : "有尚未保存的修改"
-                    : "没有未保存的修改"}
+                      ? uiText("网络和系统设置需要重启")
+                      : uiText("有尚未保存的修改")
+                    : uiText("没有未保存的修改")}
               </span>
-              <button onClick={close}>返回工作台</button>
+              <button onClick={close}>{uiText("返回工作台")}</button>
               <button
                 className="primary"
                 disabled={!changed || busy}
@@ -698,8 +666,8 @@ export function SettingsPanel({
                   <Check size={15} />
                 )}{" "}
                 {environmentChanged && status.vm_running
-                  ? "保存并重启"
-                  : "保存设置"}
+                  ? uiText("保存并重启")
+                  : uiText("保存设置")}
               </button>
             </>
           </footer>

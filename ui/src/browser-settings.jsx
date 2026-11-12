@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, { useEffect, useState } from 'react';
 import { Globe2, Info, LayoutPanelLeft, Puzzle, Search, ShieldCheck, ExternalLink } from 'lucide-react';
 import { api } from './api';
@@ -7,10 +8,10 @@ import { BrowserExtensions } from './browser-extensions';
 import './browser-settings.css';
 
 const sections = [
-  { id: 'general', title: '新标签页', icon: Globe2, search: '启动 新标签页 主页 默认 地址 网址' },
-  { id: 'appearance', title: '外观', icon: LayoutPanelLeft, search: '外观 标签栏 布局 横排 竖排' },
+  { id: 'general', title: uiText("新标签页"), icon: Globe2, search: '启动 新标签页 主页 默认 地址 网址' },
+  { id: 'appearance', title: uiText("外观"), icon: LayoutPanelLeft, search: '外观 标签栏 布局 横排 竖排' },
   { id: 'privacy', title: '隐私与网站数据', icon: ShieldCheck, search: '隐私 cookie 网站数据 权限 清除 浏览记录' },
-  { id: 'extensions', title: '扩展', icon: Puzzle, search: '扩展 插件 管理 安装 导入 edge chrome' },
+  { id: 'extensions', title: uiText("扩展"), icon: Puzzle, search: '扩展 插件 管理 安装 导入 edge chrome' },
   { id: 'about', title: '关于浏览器', icon: Info, search: '关于 浏览器 chromium 版本' },
 ];
 export function BrowserSettingsPage({ tab, tabs, currentHome, layout, onLayoutChange, onSaved, onInternal, onOpenPage, onConfirm, onSectionChange }) {
@@ -38,7 +39,7 @@ export function BrowserSettingsPage({ tab, tabs, currentHome, layout, onLayoutCh
   const cookieTab = cookieSession === 'private' && privateTab ? privateTab : tab;
   const visible = query.trim() ? sections.filter(item => `${item.title} ${item.search}`.toLowerCase().includes(query.trim().toLowerCase())) : sections.filter(item => item.id === section);
   return <section className="browser-settings-page" aria-label="浏览器设置">
-    <header className="browser-settings-top"><h1>设置</h1><label className="browser-settings-search"><Search size={16} /><input aria-label="搜索浏览器设置" placeholder="搜索设置" value={query} onChange={event => setQuery(event.target.value)} /></label></header>
+    <header className="browser-settings-top"><h1>{uiText("设置")}</h1><label className="browser-settings-search"><Search size={16} /><input aria-label="搜索浏览器设置" placeholder="搜索设置" value={query} onChange={event => setQuery(event.target.value)} /></label></header>
     <div className="browser-settings-layout">
       <nav className="browser-settings-nav" aria-label="浏览器设置分类">{sections.map(({ id, title, icon: Icon }) => <button key={id} aria-label={title} aria-description={id === 'general' && home !== savedHome ? '有未保存的更改' : undefined} aria-current={!query && section === id ? 'page' : undefined} onClick={() => changeSection(id)}><Icon size={17} /><span>{title}</span>{id === 'general' && home !== savedHome && <span className="settings-unsaved-dot" title="有未保存的更改" />}</button>)}</nav>
       <div className="browser-settings-compact-nav"><InlineSelect aria-label="浏览器设置分类" value={section} onValueChange={changeSection}>

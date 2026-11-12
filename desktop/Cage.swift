@@ -2,6 +2,21 @@ import Cocoa
 import WebKit
 import UniformTypeIdentifiers
 
+enum CageInterfaceStrings {
+    private static let english: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "Cage-English", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let messages = try? JSONDecoder().decode([String: String].self, from: data) else {
+            return [:]
+        }
+        return messages
+    }()
+
+    static func text(_ source: String) -> String {
+        return english[source] ?? source
+    }
+}
+
 enum CageDiagnostics {
     static func record(_ message: String) {
         guard let executable = Bundle.main.url(forResource: "cage", withExtension: nil),
@@ -95,24 +110,24 @@ final class CageApp: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNaviga
         nativeInput.configure(web: webView)
         content.addSubview(nativeInput)
         NSLayoutConstraint.activate([webView.leadingAnchor.constraint(equalTo: content.leadingAnchor), webView.trailingAnchor.constraint(equalTo: content.trailingAnchor), webView.topAnchor.constraint(equalTo: content.topAnchor), webView.bottomAnchor.constraint(equalTo: content.bottomAnchor)])
-        loading = NSTextField(labelWithString: "正在启动 Cage 工作台…")
+        loading = NSTextField(labelWithString: CageInterfaceStrings.text("正在启动 Cage 工作台…"))
         loading.font = NSFont.systemFont(ofSize: 16, weight: .medium)
         loading.textColor = NSColor(srgbRed: 54.0/255, green: 54.0/255, blue: 54.0/255, alpha: 1)
         loading.alignment = .center
         loading.maximumNumberOfLines = 4
         loading.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(loading)
-        retry = NSButton(title: "重试连接", target: self, action: #selector(retryConnection))
+        retry = NSButton(title: CageInterfaceStrings.text("重试连接"), target: self, action: #selector(retryConnection))
         retry.bezelStyle = .rounded
         retry.translatesAutoresizingMaskIntoConstraints = false
         retry.isHidden = true
         content.addSubview(retry)
-        completeUpdateButton = NSButton(title: "保存后停止环境并完成更新", target: self, action: #selector(completePendingUpdate))
+        completeUpdateButton = NSButton(title: CageInterfaceStrings.text("保存后停止环境并完成更新"), target: self, action: #selector(completePendingUpdate))
         completeUpdateButton.bezelStyle = .rounded
         completeUpdateButton.translatesAutoresizingMaskIntoConstraints = false
         completeUpdateButton.isHidden = true
         content.addSubview(completeUpdateButton)
-        existingEnvironmentButton = NSButton(title: "打开现有环境保存文件", target: self, action: #selector(openExistingEnvironment))
+        existingEnvironmentButton = NSButton(title: CageInterfaceStrings.text("打开现有环境保存文件"), target: self, action: #selector(openExistingEnvironment))
         existingEnvironmentButton.bezelStyle = .rounded
         existingEnvironmentButton.translatesAutoresizingMaskIntoConstraints = false
         existingEnvironmentButton.isHidden = true
@@ -135,45 +150,45 @@ final class CageApp: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNaviga
         main.addItem(appItem)
         let appMenu = NSMenu(title: "Cage")
         appItem.submenu = appMenu
-        appMenu.addItem(withTitle: "关于 Cage", action: #selector(about), keyEquivalent: "")
-        appMenu.addItem(withTitle: "检查应用更新…", action: #selector(checkApplicationUpdate), keyEquivalent: "")
-        completeUpdateMenu = appMenu.addItem(withTitle: "完成待安装更新…", action: #selector(completePendingUpdate), keyEquivalent: "")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("关于 Cage"), action: #selector(about), keyEquivalent: "")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("检查应用更新…"), action: #selector(checkApplicationUpdate), keyEquivalent: "")
+        completeUpdateMenu = appMenu.addItem(withTitle: CageInterfaceStrings.text("完成待安装更新…"), action: #selector(completePendingUpdate), keyEquivalent: "")
         completeUpdateMenu.isHidden = true
         appMenu.addItem(.separator())
         if CageProfile.macGuestTrial {
-            appMenu.addItem(withTitle: "复制试用客机登录密码", action: #selector(copyGuestLoginPassword), keyEquivalent: "")
+            appMenu.addItem(withTitle: CageInterfaceStrings.text("复制试用客机登录密码"), action: #selector(copyGuestLoginPassword), keyEquivalent: "")
         }
-        appMenu.addItem(withTitle: "设置…", action: #selector(settings), keyEquivalent: ",")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("设置…"), action: #selector(settings), keyEquivalent: ",")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "隐藏 Cage", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
-        appMenu.addItem(withTitle: "显示全部", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("隐藏 Cage"), action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("显示全部"), action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "退出 Cage…", action: #selector(requestQuit), keyEquivalent: "q")
-        let file = NSMenu(title: "文件")
-        file.addItem(withTitle: "打开项目…", action: #selector(openProject), keyEquivalent: "o")
+        appMenu.addItem(withTitle: CageInterfaceStrings.text("退出 Cage…"), action: #selector(requestQuit), keyEquivalent: "q")
+        let file = NSMenu(title: CageInterfaceStrings.text("文件"))
+        file.addItem(withTitle: CageInterfaceStrings.text("打开项目…"), action: #selector(openProject), keyEquivalent: "o")
         file.addItem(.separator())
-        file.addItem(withTitle: "新建网页", action: #selector(newTab), keyEquivalent: "t")
-        let terminal = file.addItem(withTitle: "新建终端", action: #selector(newTerminal), keyEquivalent: "\r")
+        file.addItem(withTitle: CageInterfaceStrings.text("新建网页"), action: #selector(newTab), keyEquivalent: "t")
+        let terminal = file.addItem(withTitle: CageInterfaceStrings.text("新建终端"), action: #selector(newTerminal), keyEquivalent: "\r")
         terminal.keyEquivalentModifierMask = [.command, .shift]
-        file.addItem(withTitle: "关闭当前标签", action: #selector(closeTab), keyEquivalent: "w")
+        file.addItem(withTitle: CageInterfaceStrings.text("关闭当前标签"), action: #selector(closeTab), keyEquivalent: "w")
         file.addItem(.separator())
-        file.addItem(withTitle: "关闭窗口（保留环境）", action: #selector(closeWindow), keyEquivalent: "")
-        let fileItem = NSMenuItem(title: "文件", action: nil, keyEquivalent: "")
+        file.addItem(withTitle: CageInterfaceStrings.text("关闭窗口（保留环境）"), action: #selector(closeWindow), keyEquivalent: "")
+        let fileItem = NSMenuItem(title: CageInterfaceStrings.text("文件"), action: nil, keyEquivalent: "")
         fileItem.submenu = file; main.addItem(fileItem)
-        let edit = NSMenu(title: "编辑")
-        edit.addItem(withTitle: "撤销", action: #selector(editUndo), keyEquivalent: "z")
-        let redo = edit.addItem(withTitle: "重做", action: #selector(editRedo), keyEquivalent: "z"); redo.keyEquivalentModifierMask = [.command, .shift]
+        let edit = NSMenu(title: CageInterfaceStrings.text("编辑"))
+        edit.addItem(withTitle: CageInterfaceStrings.text("撤销"), action: #selector(editUndo), keyEquivalent: "z")
+        let redo = edit.addItem(withTitle: CageInterfaceStrings.text("重做"), action: #selector(editRedo), keyEquivalent: "z"); redo.keyEquivalentModifierMask = [.command, .shift]
         edit.addItem(.separator())
-        edit.addItem(withTitle: "剪切", action: #selector(editCut), keyEquivalent: "x")
-        edit.addItem(withTitle: "复制", action: #selector(editCopy), keyEquivalent: "c")
-        edit.addItem(withTitle: "粘贴", action: #selector(editPaste), keyEquivalent: "v")
-        edit.addItem(withTitle: "全选", action: #selector(editSelectAll), keyEquivalent: "a")
-        let editItem = NSMenuItem(title: "编辑", action: nil, keyEquivalent: ""); editItem.submenu = edit; main.addItem(editItem)
-        let view = NSMenu(title: "窗口")
-        view.addItem(withTitle: "最小化", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
-        view.addItem(withTitle: "缩放", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
-        view.addItem(withTitle: "进入全屏", action: #selector(NSWindow.toggleFullScreen(_:)), keyEquivalent: "")
-        let viewItem = NSMenuItem(title: "窗口", action: nil, keyEquivalent: ""); viewItem.submenu = view; main.addItem(viewItem)
+        edit.addItem(withTitle: CageInterfaceStrings.text("剪切"), action: #selector(editCut), keyEquivalent: "x")
+        edit.addItem(withTitle: CageInterfaceStrings.text("复制"), action: #selector(editCopy), keyEquivalent: "c")
+        edit.addItem(withTitle: CageInterfaceStrings.text("粘贴"), action: #selector(editPaste), keyEquivalent: "v")
+        edit.addItem(withTitle: CageInterfaceStrings.text("全选"), action: #selector(editSelectAll), keyEquivalent: "a")
+        let editItem = NSMenuItem(title: CageInterfaceStrings.text("编辑"), action: nil, keyEquivalent: ""); editItem.submenu = edit; main.addItem(editItem)
+        let view = NSMenu(title: CageInterfaceStrings.text("窗口"))
+        view.addItem(withTitle: CageInterfaceStrings.text("最小化"), action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
+        view.addItem(withTitle: CageInterfaceStrings.text("缩放"), action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
+        view.addItem(withTitle: CageInterfaceStrings.text("进入全屏"), action: #selector(NSWindow.toggleFullScreen(_:)), keyEquivalent: "")
+        let viewItem = NSMenuItem(title: CageInterfaceStrings.text("窗口"), action: nil, keyEquivalent: ""); viewItem.submenu = view; main.addItem(viewItem)
         NSApp.mainMenu = main
     }
     @objc private func editUndo(){edit("undo",fallback:"undo:")}
@@ -254,7 +269,7 @@ final class CageApp: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNaviga
         }
     }
     private func bootstrap(options: [String] = []) {
-        loading.stringValue = options.contains("--complete-update") ? "正在停止环境并切换到新版后台…" : "正在启动 Cage 工作台…"
+        loading.stringValue = options.contains("--complete-update") ? CageInterfaceStrings.text("正在停止环境并切换到新版后台…") : CageInterfaceStrings.text("正在启动 Cage 工作台…")
         loading.isHidden = false; retry.isHidden = true; webView.isHidden = true
         completeUpdateButton.isHidden = true; existingEnvironmentButton.isHidden = true
         requestEntry(options: options) { result in
@@ -414,7 +429,7 @@ final class CageApp: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNaviga
             }
         case "exportDiagnostics":
             guard !nativeFilePanelOpen else { replyHandler(nil,"请先完成当前文件窗口"); return }
-            let panel = NSSavePanel(); panel.title = "导出诊断包"; panel.nameFieldStringValue = "cage-diagnostics.zip"
+            let panel = NSSavePanel(); panel.title = CageInterfaceStrings.text("导出诊断包"); panel.nameFieldStringValue = "cage-diagnostics.zip"
             panel.allowedContentTypes = [.zip]; nativeFilePanelOpen = true
             panel.beginSheetModal(for: window) { response in
                 self.nativeFilePanelOpen = false

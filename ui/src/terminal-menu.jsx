@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, { useLayoutEffect, useRef } from "react";
 import { TerminalSquare } from "lucide-react";
 import { AgentIcon } from "./agent-icon";
@@ -51,13 +52,11 @@ export function TerminalMenu({ choice, busy, onClose, onSelect }) {
   }, [choice]);
 
   return (
-    <div ref={menu} id="terminal-create-menu" className="menu terminal-create-menu" role="menu" aria-label="新建终端">
+    <div ref={menu} id="terminal-create-menu" className="menu terminal-create-menu" role="menu" aria-label={uiText("新建终端")}>
       <button role="menuitem" disabled={busy} onClick={() => onSelect("shell")}>
-        <TerminalSquare size={16} />普通终端
-      </button>
+        <TerminalSquare size={16} />{uiText("普通终端")}</button>
       <button role="menuitem" disabled={busy} onClick={() => onSelect("claude")}>
-        <AgentIcon />Claude 终端
-      </button>
+        <AgentIcon />{uiText("Claude 终端")}</button>
     </div>
   );
 }

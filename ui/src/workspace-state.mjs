@@ -1,3 +1,4 @@
+import { uiFormat, uiText } from "./ui-language.mjs";
 export function readLocal(key, fallback) {
   try {
     return JSON.parse(localStorage.getItem(key)) ?? fallback;
@@ -30,20 +31,20 @@ export function rememberClientProjectName(share) {
 
 export function projectName(path, defaultWorkspace) {
   if (clientMount.test(path)) {
-    try { return sessionStorage.getItem(path) || "本机共享项目"; }
-    catch { return "本机共享项目"; }
+    try { return sessionStorage.getItem(path) || uiText("本机共享项目"); }
+    catch { return uiText("本机共享项目"); }
   }
-  if (path === defaultWorkspace && path?.endsWith("-workspace")) return "默认工作区";
-  return folderName(path) || "新项目";
+  if (path === defaultWorkspace && path?.endsWith("-workspace")) return uiText("默认工作区");
+  return folderName(path) || uiText("新项目");
 }
 
 export function tabName(tab, saved, project) {
-  return (tab.incognito ? "无痕 · " : "") + (
+  return (tab.incognito ? uiText("无痕 · ") : "") + (
     saved[tab.id]?.title ||
     (tab.kind === "editor"
-      ? `文件 · ${tab.workspace ? projectName(tab.workspace) : project}`
+      ? uiFormat("文件 · {0}", tab.workspace ? projectName(tab.workspace) : project)
       : tab.title) ||
-    "新标签页"
+    uiText("新标签页")
   );
 }
 

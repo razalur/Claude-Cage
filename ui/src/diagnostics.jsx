@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, { useEffect, useState } from "react";
 import { ArrowDownToLine, LoaderCircle } from "lucide-react";
 import { api, native, nativeAvailable } from "./api";
@@ -35,17 +36,17 @@ export function DiagnosticSettings() {
     } catch (error) { setError(error.message); }
     finally { setBusy(false); }
   };
-  return <section className="settings-group" aria-label="日志与诊断">
-    <h3>日志与诊断</h3>
-    <p className="footnote">自动记录应用故障并脱敏，保留 14 天。每个后台日志上限 40 MiB，环境服务预算 10 MiB。诊断包会同时收集桌面连接与当前环境的记录，最大 96 MiB。采集范围限于故障日志与运行状态。</p>
-    {info && <p className="footnote">{remote ? "服务器" : "本机"}日志 {(info.bytes / 1024 / 1024).toFixed(1)} MiB · {info.files} 个文件</p>}
+  return <section className="settings-group" aria-label={uiText("日志与诊断")}>
+    <h3>{uiText("日志与诊断")}</h3>
+    <p className="footnote">{uiText("自动记录应用故障并脱敏，保留 14 天。每个后台日志上限 40 MiB，环境服务预算 10 MiB。诊断包会同时收集桌面连接与当前环境的记录，最大 96 MiB。采集范围限于故障日志与运行状态。")}</p>
+    {info && <p className="footnote">{remote ? uiText("服务器") : uiText("本机")}{uiText("日志")} {(info.bytes / 1024 / 1024).toFixed(1)} MiB · {info.files} {uiText("个文件")}</p>}
     <button className="secondary-button" disabled={busy} onClick={save}>
       {busy ? <LoaderCircle size={14} className="spin" /> : <ArrowDownToLine size={14} />}
-      {busy ? "正在导出…" : remote ? "导出服务器诊断包" : "导出诊断包"}
+      {busy ? uiText("正在导出…") : remote ? uiText("导出服务器诊断包") : uiText("导出诊断包")}
     </button>
-    <p className="footnote">{remote ? "诊断包包含本机界面与当前云端主机的脱敏日志、版本和收集状态，需要保持远程连接。导出后保存在你选择的本机位置。" : "诊断包包含界面与环境的脱敏日志、版本和收集状态，环境离线时仍可导出本机记录。只保存在你选择的位置。"}</p>
-    {notice && <p role="status">{notice}</p>}
-    {error && <p role="alert" className="error-message">{error}</p>}
+    <p className="footnote">{remote ? uiText("诊断包包含本机界面与当前云端主机的脱敏日志、版本和收集状态，需要保持远程连接。导出后保存在你选择的本机位置。") : uiText("诊断包包含界面与环境的脱敏日志、版本和收集状态，环境离线时仍可导出本机记录。只保存在你选择的位置。")}</p>
+    {notice && <p role="status">{uiText(notice)}</p>}
+    {error && <p role="alert" className="error-message">{uiText(error)}</p>}
   </section>;
 }
 
@@ -56,10 +57,10 @@ export class DiagnosticBoundary extends React.Component {
   render() {
     if (!this.state.failed) return this.props.children;
     return <main style={{ padding: 32 }}>
-      <h2>工作台显示遇到异常</h2>
-      <p>后台任务仍可继续运行。可以导出诊断包，再重新加载界面。</p>
+      <h2>{uiText("工作台显示遇到异常")}</h2>
+      <p>{uiText("后台任务仍可继续运行。可以导出诊断包，再重新加载界面。")}</p>
       <DiagnosticSettings />
-      <button className="primary-button" onClick={() => location.reload()}>重新加载界面</button>
+      <button className="primary-button" onClick={() => location.reload()}>{uiText("重新加载界面")}</button>
     </main>;
   }
 }

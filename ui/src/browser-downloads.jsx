@@ -1,3 +1,4 @@
+import { uiText, uiFormat } from "./ui-language.mjs";
 import React, {
   useEffect,
   useId,
@@ -42,7 +43,7 @@ export function useDownloadNotifications(
         observed.current.add(item.id);
       if (item.state === "failed" && previous.current.get(item.id)?.state !== "failed")
         onStatus(
-          `“${item.name}”未能保存：${item.error || "请在下载列表中重试"}`,
+          uiFormat("“{0}”未能保存：{1}", item.name, uiText(item.error || "请在下载列表中重试")),
         );
       if (
         item.target === "desktop" &&
@@ -50,9 +51,9 @@ export function useDownloadNotifications(
         previous.current.get(item.id)?.state !== item.state
       ) {
         if (item.state === "downloading")
-          onStatus(`正在下载“${item.name}”，可在侧栏“下载”查看`);
+          onStatus(uiFormat("正在下载“{0}”，可在侧栏“下载”查看", item.name));
         if (item.state === "saved")
-          onStatus(`“${item.name}”已保存到默认工作区的 Downloads`);
+          onStatus(uiFormat("“{0}”已保存到默认工作区的 Downloads", item.name));
       }
       if (item.openError && previous.current.get(item.id)?.openError !== item.openError)
         onStatus(`“${item.name}”${item.openError}`);
@@ -269,16 +270,16 @@ export function BrowserDownloads({
               : "icon-button browser-download-button"
         }
         role={menu ? "menuitem" : undefined}
-        aria-label={sidebar ? "下载文件" : "浏览器下载"}
+        aria-label={sidebar ? uiText("下载文件") : uiText("浏览器下载")}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        title={failed ? "有下载需要处理，点击查看" : "下载文件"}
+        title={failed ? uiText("有下载需要处理，点击查看") : uiText("下载文件")}
         onClick={() => setOpen((value) => !value)}
       >
         {sidebar && failed ? <CircleAlert size={16} /> : <ArrowDownToLine size={16} />}
         {failed && !sidebar && !menu && <span className="browser-download-warning" aria-hidden="true" />}
-        {(sidebar || menu) && <span>下载</span>}
+        {(sidebar || menu) && <span>{uiText("下载")}</span>}
       </button>
       {open &&
         createPortal(
@@ -287,15 +288,15 @@ export function BrowserDownloads({
             id={panelId}
             className="browser-download-panel"
             role="dialog"
-            aria-label="下载文件"
+            aria-label={uiText("下载文件")}
             data-browser-dialog
           >
             <header className="browser-download-heading">
-              <h2>下载</h2>
+              <h2>{uiText("下载")}</h2>
               <button
                 className="icon-button"
-                aria-label="关闭面板"
-                title="关闭下载"
+                aria-label={uiText("关闭面板")}
+                title={uiText("关闭下载")}
                 onClick={() => {
                   setOpen(false);
                   (anchorRef?.current || trigger.current)?.focus();
@@ -308,8 +309,8 @@ export function BrowserDownloads({
               {!items.length && (
                 <div className="browser-download-empty">
                   <ArrowDownToLine size={28} />
-                  <strong>暂无下载</strong>
-                  <p>下载的文件会显示在这里。</p>
+                  <strong>{uiText("暂无下载")}</strong>
+                  <p>{uiText("下载的文件会显示在这里。")}</p>
                 </div>
               )}
               {items.map((item) => (
@@ -324,8 +325,8 @@ export function BrowserDownloads({
                     <p className="download-status">
                       <span className="download-state">
                         {item.localSaved
-                          ? "已保存到本机"
-                          : labels[item.state] || "状态待确认"}
+                          ? uiText("已保存到本机")
+                          : uiText(labels[item.state] || "状态待确认")}
                         {item.state === "downloading" &&
                           item.totalBytes > 0 &&
                           ` · ${Math.min(100, Math.floor((item.receivedBytes / item.totalBytes) * 100))}%`}
@@ -334,8 +335,8 @@ export function BrowserDownloads({
                         <span className="download-path" title={item.path}>
                           {remote
                             ? item.localSaved
-                              ? "本机："
-                              : "云端："
+                              ? uiText("本机：")
+                              : uiText("云端：")
                             : ""}
                           {item.path}
                         </span>
@@ -343,15 +344,15 @@ export function BrowserDownloads({
                     </p>
                     {item.state === "downloading" && (
                       <progress
-                        aria-label={`${item.name} 下载进度`}
+                        aria-label={uiFormat("{0} 下载进度", item.name)}
                         value={
                           item.totalBytes > 0 ? item.receivedBytes : undefined
                         }
                         max={item.totalBytes > 0 ? item.totalBytes : 1}
                       />
                     )}
-                    {item.error && <p role="status">{item.error}</p>}
-                    {item.openError && <p role="status">{item.openError}</p>}
+                    {item.error && <p role="status">{uiText(item.error)}</p>}
+                    {item.openError && <p role="status">{uiText(item.openError)}</p>}
                     {(item.state === "saved" || item.retryable) && (
                       <div className="download-actions">
                         {(item.state === "saved" ||
@@ -371,7 +372,7 @@ export function BrowserDownloads({
                             }}
                           >
                             <Save size={13} />
-                            {retrying === item.id ? "正在保存…" : "另存为…"}
+                            {retrying === item.id ? uiText("正在保存…") : uiText("另存为…")}
                           </button>
                         )}
                         {nativeAvailable() &&
@@ -388,8 +389,8 @@ export function BrowserDownloads({
                                   : "icon-button download-reveal"
                               }
                               key={operation}
-                              aria-label={label}
-                              title={label}
+                              aria-label={uiText(label)}
+                              title={uiText(label)}
                               onClick={async () => {
                                 try {
                                   await native("browserDownloadAction", {
@@ -404,7 +405,7 @@ export function BrowserDownloads({
                               {operation === "reveal" ? (
                                 <FolderOpen size={16} />
                               ) : (
-                                label
+                                uiText(label)
                               )}
                             </button>
                           ))}
@@ -433,7 +434,7 @@ export function BrowserDownloads({
                               }
                             }}
                           >
-                            {retrying === item.id ? "正在重试…" : "重试保存"}
+                            {retrying === item.id ? uiText("正在重试…") : uiText("重试保存")}
                           </button>
                         )}
                       </div>

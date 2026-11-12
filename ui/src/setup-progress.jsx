@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React from "react";
 import { SafetyMessage } from "./safety-message";
 import { ArrowDownToLine, Box, Layers3, PackageOpen, SlidersHorizontal } from "lucide-react";
@@ -60,10 +61,10 @@ export function SetupProgress({ job, onDetails, onStop, onRetry, disconnected })
       </>}
     </div>
     <div className="setup-transfer-actions">
-      <button className="text-button" type="button" onClick={onDetails}>操作详情</button>
+      <button className="text-button" type="button" onClick={onDetails}>{uiText("操作详情")}</button>
       {canContinue
-        ? <button type="button" className="primary" onClick={onRetry} disabled={disconnected}>{waitingForWindows && !failed ? "已进入桌面，继续安装" : "继续安装"}</button>
-        : <button type="button" onClick={onStop} disabled={disconnected}>停止安装</button>}
+        ? <button type="button" className="primary" onClick={onRetry} disabled={disconnected}>{waitingForWindows && !failed ? uiText("已进入桌面，继续安装") : uiText("继续安装")}</button>
+        : <button type="button" onClick={onStop} disabled={disconnected}>{uiText("停止安装")}</button>}
     </div>
   </section>;
 }

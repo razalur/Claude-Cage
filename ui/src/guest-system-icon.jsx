@@ -1,3 +1,4 @@
+import { uiFormat } from "./ui-language.mjs";
 import React from "react";
 
 const labels = { macos: "macOS", "windows-11": "Windows", "debian-12": "Debian", "debian-13": "Linux", "ubuntu-22.04": "Ubuntu", "ubuntu-24.04": "Ubuntu" };
@@ -5,7 +6,8 @@ const labels = { macos: "macOS", "windows-11": "Windows", "debian-12": "Debian",
 export function GuestSystemIcon({ system }) {
   const label = labels[system];
   if (!label) return null;
-  return <span className="guest-system-icon" role="img" aria-label={`客户机系统：${label}`} title={`客户机系统：${label}`}>
+  const description = uiFormat("客户机系统：{0}", label);
+  return <span className="guest-system-icon" role="img" aria-label={description} title={description}>
     {system === "windows-11" ? <svg viewBox="0 0 24 24" aria-hidden="true">
       <path fill="currentColor" d="M2 2h9v9H2zm11 0h9v9h-9zM2 13h9v9H2zm11 0h9v9h-9z" />
     </svg> : system === "macos" ? <svg viewBox="0 0 24 24" aria-hidden="true">

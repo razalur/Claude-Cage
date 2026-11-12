@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import React, {
   createContext,
   useCallback,
@@ -106,7 +107,7 @@ export function ClientRoot({ children }) {
       {error && (
         <div className="client-error error-message" role="alert">
           {error}
-          <button onClick={() => location.reload()}>重新连接</button>
+          <button onClick={() => location.reload()}>{uiText("重新连接")}</button>
         </div>
       )}
       {context ? (
@@ -497,7 +498,7 @@ function Environment({ context, refresh, children }) {
         {ready && !showHosts && (
           <button className="ssh-fallback" onClick={openSidebar}>
             <Server size={15} />
-            SSH 主机
+            {uiText("SSH 主机")}
           </button>
         )}
       </header>}
@@ -541,12 +542,12 @@ function Environment({ context, refresh, children }) {
         {showHosts && (
           <aside
             className="workspace-sidebar ssh-sidebar"
-            aria-label="SSH 主机"
+            aria-label={uiText("SSH 主机")}
           >
             <div className="sidebar-top">
               <span className="sidebar-brand">
                 <Server size={18} />
-                SSH 主机
+                {uiText("SSH 主机")}
               </span>
               {ready && (
                 <button
@@ -652,7 +653,7 @@ function Environment({ context, refresh, children }) {
                         })
                       }
                     >
-                      编辑
+                      {uiText("编辑")}
                     </button>
                     <button
                       disabled={Boolean(busy) || hostConnected || verifying}
@@ -736,7 +737,7 @@ function Environment({ context, refresh, children }) {
         {ready ? (
           <div className="client-workbench">{children}</div>
         ) : defaultLocal && !error && candidate?.connection?.state !== "failed" && !expanded ? (
-          <div className="client-loading" role="status">正在打开 Cage 工作台…</div>
+          <div className="client-loading" role="status">{uiText("正在打开 Cage 工作台…")}</div>
         ) : (
           <main className="environment-picker">
             <div>
@@ -817,7 +818,7 @@ function Environment({ context, refresh, children }) {
           footer={
             <>
               <button disabled={Boolean(busy)} onClick={() => setRemove(null)}>
-                取消
+                {uiText("取消")}
               </button>
               <button
                 className="primary"
@@ -853,7 +854,7 @@ function Environment({ context, refresh, children }) {
           footer={
             <>
               <button disabled={decisionBusy} onClick={cancelDecision}>
-                取消
+                {uiText("取消")}
               </button>
               <button
                 disabled={decisionBusy}
@@ -917,7 +918,7 @@ function Environment({ context, refresh, children }) {
           footer={
             <>
               <button disabled={Boolean(busy)} onClick={() => setStop(null)}>
-                取消
+                {uiText("取消")}
               </button>
               <button
                 className="primary"

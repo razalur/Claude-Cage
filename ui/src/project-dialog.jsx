@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import { isWindows, isMac } from "./platform.mjs";
 import React, { useEffect, useState } from "react";
 import { FolderOpen, LoaderCircle, Plus } from "lucide-react";
@@ -139,7 +140,7 @@ export function ProjectDialog({
   }} />;
   return (
     <Modal
-      title={activate ? "打开项目" : "选择工作项目"}
+      title={activate ? uiText("打开项目") : "选择工作项目"}
       onClose={busy ? undefined : onClose}
       footer={
         <>
@@ -149,7 +150,7 @@ export function ProjectDialog({
               : adding ? "添加到 Cage 项目列表" : "使用已授权的 Cage 项目"}
           </span>
           <button disabled={busy} onClick={onClose}>
-            取消
+            {uiText("取消")}
           </button>
           <button
             className="primary"
@@ -162,7 +163,7 @@ export function ProjectDialog({
             ) : (
               <FolderOpen size={15} />
             )}
-            {activate ? "打开项目" : "使用此项目"}
+            {activate ? uiText("打开项目") : "使用此项目"}
           </button>
         </>
       }
@@ -191,7 +192,7 @@ export function ProjectDialog({
               <input type="radio" name="project" value={project} checked={path === project} onChange={() => { setPath(project); setError(""); }} />
               <FolderOpen size={18} aria-hidden="true" />
               <span>
-                <strong>{project === status.environment_directory ? "默认工作区" : projectName(project)}</strong>
+                <strong>{project === status.environment_directory ? uiText("默认工作区") : projectName(project)}</strong>
                 <small>{shares.find((s) => s.guest_path === project)?.path || project}</small>
                 {status.project_errors?.some((item) => item.path === project) && <small>需要重新连接，选择后重试</small>}
               </span>
@@ -226,7 +227,7 @@ export function ProjectDialog({
           />
           {(remote || nativeAvailable()) && (
             <button type="button" onClick={choose} disabled={busy || browsing}>
-              {browsing ? "正在读取…" : remote ? "浏览云端文件夹…" : "选择文件夹…"}
+              {browsing ? uiText("正在读取…") : remote ? "浏览云端文件夹…" : "选择文件夹…"}
             </button>
           )}
           </div>

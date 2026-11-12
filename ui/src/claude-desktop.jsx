@@ -1,3 +1,4 @@
+import { uiText } from "./ui-language.mjs";
 import { InlineSelect } from "./inline-select";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -54,7 +55,7 @@ export function DesktopToolbar({ desktop, platform, zoom, setZoom, onConfirm, on
         {sidebarCollapsed && (
           <button
             className="icon-button"
-            aria-label="展开侧栏"
+            aria-label={uiText("展开侧栏")}
             onClick={onExpand}
           >
             <PanelLeftOpen size={17} />
@@ -69,14 +70,14 @@ export function DesktopToolbar({ desktop, platform, zoom, setZoom, onConfirm, on
         {children}
         {desktop?.running && (
           <label className="desktop-display-size">
-            显示大小
-            <InlineSelect aria-label="Desktop 显示大小" value={zoom} onValueChange={(next) => {
+            {uiText("显示大小")}
+            <InlineSelect aria-label={uiText("Desktop 显示大小")} value={zoom} onValueChange={(next) => {
               const value = next === "auto" ? "auto" : Number(next);
               setZoom(value);
               try { localStorage.setItem(automatic ? "cage-windows-desktop-zoom" : "cage-desktop-zoom", String(value)); } catch { /* Session-only preference. */ }
             }}>
-              {automatic && <option value="auto">自适应（推荐）</option>}
-              {desktopZooms.map((value) => <option key={value} value={value}>{Math.round(value * 100)}%{value === 1 ? "（默认）" : ""}</option>)}
+              {automatic && <option value="auto">{uiText("自适应（推荐）")}</option>}
+              {desktopZooms.map((value) => <option key={value} value={value}>{Math.round(value * 100)}%{value === 1 ? uiText("（默认）") : ""}</option>)}
             </InlineSelect>
           </label>
         )}
@@ -87,21 +88,19 @@ export function DesktopToolbar({ desktop, platform, zoom, setZoom, onConfirm, on
             onClick={async () => {
               if (
                 await onConfirm({
-                  title: "关闭 Claude Desktop？",
-                  body: "请先保存应用内的工作。浏览器和 Cage 终端会继续运行。",
-                  confirm: "关闭应用",
+                  title: uiText("关闭 Claude Desktop？"),
+                  body: uiText("请先保存应用内的工作。浏览器和 Cage 终端会继续运行。"),
+                  confirm: uiText("关闭应用"),
                 })
               )
                 onStop();
             }}
           >
-            <Power size={15} />
-            关闭应用
-          </button>
+            <Power size={15} />{uiText("关闭应用")}</button>
         )}
         <button
           className="icon-button"
-          aria-label="刷新 Claude Desktop 状态"
+          aria-label={uiText("刷新 Claude Desktop 状态")}
           disabled={busy}
           onClick={refresh}
         >
@@ -225,17 +224,15 @@ export function ClaudeDesktop({
           <SafetyMessage message={error || statusError || (desktop?.failure_reason === "oom-kill"
             ? "环境内存不足，Claude Desktop 已被系统关闭。请在设置中检查计算资源后重新打开。"
             : "Claude Desktop 未能启动，可重试打开或修复安装。")} />
-          <button onClick={onDetails}>操作详情</button>
+          <button onClick={onDetails}>{uiText("操作详情")}</button>
         </div>
       )}
-      {desktop?.running && desktop.managed === false && !desktop.native_user_session && <div className="connection-banner" role="status">当前应用尚未接入 Cage 账户解锁。请先保存并关闭应用，再重新打开。</div>}
+      {desktop?.running && desktop.managed === false && !desktop.native_user_session && <div className="connection-banner" role="status">{uiText("当前应用尚未接入 Cage 账户解锁。请先保存并关闭应用，再重新打开。")}</div>}
       {busy && ownJob && (
         <div className="desktop-progress" role="status">
           <RefreshCw size={16} className="spin" />
-          {status.job.message}
-          <button className="text-button" onClick={onDetails}>
-            查看进度
-          </button>
+          {uiText(status.job.message)}
+          <button className="text-button" onClick={onDetails}>{uiText("查看进度")}</button>
         </div>
       )}
       <div className="desktop-screen">
@@ -256,16 +253,11 @@ export function ClaudeDesktop({
             <h2>
               {desktop?.installed
                 ? "Claude Desktop"
-                : "在 Cage 中使用 Claude Desktop"}
+                : uiText("在 Cage 中使用 Claude Desktop")}
             </h2>
-            <p>
-              Chat 和 Code 共用一个官方应用。在 Cage
-              内安装、登录并使用，项目文件来自已打开的文件夹。
-            </p>
+            <p>{uiText("Chat 和 Code 共用一个官方应用。在 Cage 内安装、登录并使用，项目文件来自已打开的文件夹。")}</p>
             {!desktop?.installed && (
-              <p>
-                首次使用时从 Anthropic 官方源下载，不增加 Cage 默认安装包体积。
-              </p>
+              <p>{uiText("首次使用时从 Anthropic 官方源下载，不增加 Cage 默认安装包体积。")}</p>
             )}
             <div className="desktop-actions">
               {desktop && (
@@ -279,7 +271,7 @@ export function ClaudeDesktop({
                   ) : (
                     <Download size={16} />
                   )}
-                  {desktop.installed ? "打开 Claude Desktop" : "下载并安装"}
+                  {desktop.installed ? uiText("打开 Claude Desktop") : uiText("下载并安装")}
                 </button>
               )}
               {desktop?.installed && (
@@ -287,24 +279,17 @@ export function ClaudeDesktop({
                   className="quiet-button"
                   disabled={busy}
                   onClick={() => run("install")}
-                >
-                  更新 / 修复安装
-                </button>
+                >{uiText("更新 / 修复安装")}</button>
               )}
               {!desktop && (
                 <button
                   className="quiet-button"
                   disabled={busy}
                   onClick={refresh}
-                >
-                  重新读取状态
-                </button>
+                >{uiText("重新读取状态")}</button>
               )}
             </div>
-            <p className="desktop-note">
-              关闭应用后释放图形会话资源，登录状态保留在 Cage
-              环境中。需要额外虚拟机的 Cowork 功能暂未适配。
-            </p>
+            <p className="desktop-note">{uiText("关闭应用后释放图形会话资源，登录状态保留在 Cage 环境中。需要额外虚拟机的 Cowork 功能暂未适配。")}</p>
           </div>
         )}
       </div>
